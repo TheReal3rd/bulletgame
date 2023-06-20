@@ -27,17 +27,14 @@ def collision():
     # Enemy Bullets
     for value in sprites.all_of_kind(SpriteKind.EnemyProjectile):
         # Step 1 Check whether the sprite is in view - if not destroy it.
-        dist = calcDist(value.x,
-            value.y,
-            scene.screen_width() / 2,
-            scene.screen_height() / 2)
+        dist = calcDist(value.x,value.y,scene.screen_width() / 2,scene.screen_height() / 2)
         if dist >= scene.screen_width():
             # # Off screen remove it.
             sprites.destroy(value)
             continue
         # Step 2 Check whether the sprites a close too each other - if not skip
         dist = calcDist(value.x, value.y, PlayerOne.x, PlayerOne.y)
-        if dist >= 7:
+        if dist >= 10:
             continue
         # Step 3 Check for collision
         if PlayerOne.overlaps_with(value):
@@ -47,16 +44,13 @@ def collision():
             screenFlash = True
     # Player Bullets This is the same as the first for loop but for the player attacking the enemy
     for value1 in sprites.all_of_kind(SpriteKind.projectile):
-        dist = calcDist(value1.x,
-            value1.y,
-            scene.screen_width() / 2,
-            scene.screen_height() / 2)
+        dist = calcDist(value1.x,value1.y,scene.screen_width() / 2,scene.screen_height() / 2)
         if dist >= scene.screen_width():
             # # Off screen remove it.
             sprites.destroy(value1)
             continue
         dist = calcDist(value1.x, value1.y, EnemyOne.x, EnemyOne.y)
-        if dist >= 7:
+        if dist >= 10:
             continue
         if EnemyOne.overlaps_with(value1):
             value1.start_effect(effects.fire, 100)
@@ -81,7 +75,7 @@ def movement():
         PlayerOne.x += moveSpeed
 # This updates the enemy the stage system is here to add more enemies.
 def updateEnemy():
-    global waypoint, EnemyStage
+    global waypoint, EnemyStage, EnemyOne
     if EnemyStage == 0:
         if enemyFireDelay.passed(2000):
             # # if 2000 ms passed the enemy will shoot.
@@ -90,7 +84,7 @@ def updateEnemy():
                 angle = -60
             # 1 is the lowest.
             # 30 max
-            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, 1, 4)
+            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, 0, 4)
             enemyFireDelay.reset()
         elif Math.percent_chance(2):
             # # 2% chance to generate a new waypoint.
@@ -138,7 +132,6 @@ def shoot():
 # Distance Caculation.
 # Provide x1 and y1 and it'll calculate the distance to x2 and y2
 def calcDist(posX: number, posY: number, posX1: number, posY1: number):
-    global xDiff, yDiff
     xDiff = posX - posX1
     yDiff = posY - posY1
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
@@ -148,15 +141,9 @@ def on_life_zero():
     game.reset()
 info.on_life_zero(on_life_zero)
 
-"""
-
-On start here.
-
-"""
 # The Maths side can't be done in blocks.
 # This is the pattern shooter for the enemy.
 def shootBullets(posX2: number, posY2: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number):
-    global enemyProjectile
     # Laser Shoot
     if typeBullet == 0:
         # Circle shoot.
@@ -167,25 +154,21 @@ def shootBullets(posX2: number, posY2: number, distance: number, angleOffset: nu
             velX = Math.sin(Math.PI * (angle2 + angleOffset) / 180) * distance
             velY = (0 - Math.cos(Math.PI * (angle2 + angleOffset) / 180)) * distance
             enemyProjectile = sprites.create(assets.image("""EnemyBullet """),SpriteKind.EnemyProjectile)
-            enemyProjectile.set_velocity(velX, velY)
             enemyProjectile.set_position(oPosX, oPosY)
+            enemyProjectile.set_velocity(velX, velY)
             angle2 += numBullets * 10
     elif typeBullet == 1:
         enemyProjectile = sprites.create(assets.image("""LaserPixel"""),SpriteKind.EnemyProjectile)
         enemyProjectile.set_position(posX2, posY2)
     else:
         pass
-enemyProjectile: Sprite = None
-yDiff = 0
-xDiff = 0
 moveSpeed = 0
 screenFlash = False
 EnemyStage = 0
 PlayerOne: Sprite = None
 enemyHealth = 0
-projectile22 = None
 EnemyOne: Sprite = None
-waypoint: List[number] = None
+waypoint: any = None
 fireDelay = msDelay()
 enemyFireDelay = msDelay()
 enemyHealth = 30

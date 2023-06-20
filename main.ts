@@ -59,7 +59,7 @@ function collision() {
         
         //  Step 2 Check whether the sprites a close too each other - if not skip
         dist = calcDist(value.x, value.y, PlayerOne.x, PlayerOne.y)
-        if (dist >= 7) {
+        if (dist >= 10) {
             continue
         }
         
@@ -82,7 +82,7 @@ function collision() {
         }
         
         dist = calcDist(value1.x, value1.y, EnemyOne.x, EnemyOne.y)
-        if (dist >= 7) {
+        if (dist >= 10) {
             continue
         }
         
@@ -141,7 +141,7 @@ function updateEnemy() {
             
             //  1 is the lowest.
             //  30 max
-            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, 1, 4)
+            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, 0, 4)
             enemyFireDelay.reset()
         } else if (Math.percentChance(2)) {
             //  # 2% chance to generate a new waypoint.
@@ -216,9 +216,8 @@ function shoot() {
 //  Distance Caculation.
 //  Provide x1 and y1 and it'll calculate the distance to x2 and y2
 function calcDist(posX: number, posY: number, posX1: number, posY1: number): number {
-    
-    xDiff = posX - posX1
-    yDiff = posY - posY1
+    let xDiff = posX - posX1
+    let yDiff = posY - posY1
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
 }
 
@@ -226,7 +225,6 @@ function calcDist(posX: number, posY: number, posX1: number, posY1: number): num
 info.onLifeZero(function on_life_zero() {
     game.reset()
 })
-/** On start here. */
 //  The Maths side can't be done in blocks.
 //  This is the pattern shooter for the enemy.
 function shootBullets(posX2: number, posY2: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number) {
@@ -235,7 +233,7 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
     let oPosY: number;
     let velX: number;
     let velY: number;
-    
+    let enemyProjectile: Sprite;
     //  Laser Shoot
     if (typeBullet == 0) {
         //  Circle shoot.
@@ -246,8 +244,8 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
             velX = Math.sin(Math.PI * (angle2 + angleOffset) / 180) * distance
             velY = (0 - Math.cos(Math.PI * (angle2 + angleOffset) / 180)) * distance
             enemyProjectile = sprites.create(assets.image`EnemyBullet `, SpriteKind.EnemyProjectile)
-            enemyProjectile.setVelocity(velX, velY)
             enemyProjectile.setPosition(oPosX, oPosY)
+            enemyProjectile.setVelocity(velX, velY)
             angle2 += numBullets * 10
         }
     } else if (typeBullet == 1) {
@@ -259,15 +257,11 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
     
 }
 
-let enemyProjectile : Sprite = null
-let yDiff = 0
-let xDiff = 0
 let moveSpeed = 0
 let screenFlash = false
 let EnemyStage = 0
 let PlayerOne : Sprite = null
 let enemyHealth = 0
-let projectile22 = null
 let EnemyOne : Sprite = null
 let waypoint : number[] = null
 let fireDelay = new msDelay()
