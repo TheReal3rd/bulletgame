@@ -1,0 +1,32 @@
+{
+    "image1": {
+        "data": "hwQQACAAAAAAAAAAAADw//8AAAAAAAAAAAAAAMzMz73LDAAAAPD/AAAAz8wR8du7zM0MAAC/+wAA8BzDEcG7+9zdzQzwuw8AAM/MExwRu8vMzNv7v8sPAPAbETPMEbu7zMzMzMz8AAC/uxERERG7u8vMzMy7/AAAv7y7Ef+xvLu7zMz8v/sAAP+7u7v/u7y8u8zM/Ny7DwAAv7u7u8vLu7vM/A/cuwwAAPC/u7u7vLvL/w8AwLzLAAAA8P//zMzM/wAAAADAzAAAAAAAAM+8yw8AAAAAAAAAAAAAAADM3bsPAAAAAAAAAAAAAAAAwNy9/AAAAAAAAAAAAAAAAADA/P8AAAAAAAAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "myImage"
+    },
+    "image3": {
+        "data": "hwQYABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8P8AAAAAAAAAAAAAwLEAAAAAAAAA//8PH/sAAAAAAAD/3b38H7EAAAAAAPAbEd29H/sAAAAAAPAREb0czPEPAAAAAB8REfEfvf8PAAAAAB8REdER+///AAAAAB8REdERsf//AAAAAB8REfEf+///AAAAAPAREb0czbEPAAAAAPAbEd29H/sAAAAAAAD/3b38H7EAAAAAAAAA//8PH/sAAAAAAAAAAAAAz7EAAAAAAAAAAAAA8P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "myImage1"
+    },
+    "image5": {
+        "data": "hwQDACwBAAAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIAACIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIgAAIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "Laser"
+    },
+    "image4": {
+        "data": "hwQGAAYAAAAAIgAAICICACIiIgAiIiIAICICAAAiAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "EnemyBullet"
+    },
+    "image2": {
+        "data": "hwQGAAYAAAAARAAAQEQEAERERABEREQAQEQEAABEAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "PlayerBullet"
+    },
+    "*": {
+        "mimeType": "image/x-mkcd-f4",
+        "dataEncoding": "base64",
+        "namespace": "myImages"
+    }
+}
