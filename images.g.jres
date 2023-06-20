@@ -9,11 +9,6 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "myImage1"
     },
-    "image5": {
-        "data": "hwQDACwBAAAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIAACIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIgAAIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiAAA=",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "Laser"
-    },
     "image4": {
         "data": "hwQGAAYAAAAAIgAAICICACIiIgAiIiIAICICAAAiAAA=",
         "mimeType": "image/x-mkcd-f4",
@@ -23,6 +18,11 @@
         "data": "hwQGAAYAAAAARAAAQEQEAERERABEREQAQEQEAABEAAA=",
         "mimeType": "image/x-mkcd-f4",
         "displayName": "PlayerBullet"
+    },
+    "image5": {
+        "data": "hwQDAAMAAAAiAgAAIgIAACICAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "LaserPixel"
     },
     "*": {
         "mimeType": "image/x-mkcd-f4",

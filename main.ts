@@ -2,61 +2,9 @@ namespace SpriteKind {
     export const EnemyProjectile = SpriteKind.create()
 }
 
-//  On start is a initialization block.
-function collision() {
-    let dist: number;
-    
-    // Enemy Bullets
-    for (let value of sprites.allOfKind(SpriteKind.EnemyProjectile)) {
-        // Step 1 Check whether the sprite is in view - if not destroy it.
-        dist = calcDist(value.x, value.y, scene.screenWidth() / 2, scene.screenHeight() / 2)
-        if (dist >= scene.screenWidth()) {
-            // # Off screen remove it.
-            sprites.destroy(value)
-            continue
-        }
-        
-        // Step 2 Check whether the sprites a close too each other - if not skip
-        dist = calcDist(value.x, value.y, PlayerOne.x, PlayerOne.y)
-        if (dist >= 10) {
-            continue
-        }
-        
-        // Step 3 Check for collision
-        if (PlayerOne.overlapsWith(value)) {
-            value.startEffect(effects.fire, 100)
-            sprites.destroy(value)
-            info.changeLifeBy(-1)
-            screenFlash = true
-        }
-        
-    }
-    // Player Bullets This is the same as the first for loop but for the player attacking the enemy
-    for (let value1 of sprites.allOfKind(SpriteKind.Projectile)) {
-        dist = calcDist(value1.x, value1.y, scene.screenWidth() / 2, scene.screenHeight() / 2)
-        if (dist >= scene.screenWidth()) {
-            // # Off screen remove it.
-            sprites.destroy(value1)
-            continue
-        }
-        
-        dist = calcDist(value1.x, value1.y, EnemyOne.x, EnemyOne.y)
-        if (dist >= 10) {
-            continue
-        }
-        
-        if (EnemyOne.overlapsWith(value1)) {
-            value1.startEffect(effects.fire, 100)
-            sprites.destroy(value1)
-            enemyHealth += 0 - 1
-        }
-        
-    }
-}
-
-// Reusable MiliSecond timer. 
+// Reusable MiliSecond timer.
 // Why? - This is a better and more consistant compared to using a counter / tick delay system.
-// This is beacuse its fixed on the speed of the CPU. not the current time. Meaning when the CPU is slowed down the 
+// This is beacuse its fixed on the speed of the CPU. not the current time. Meaning when the CPU is slowed down the
 // counter it slowed down.
 class msDelay {
     static counter: number
@@ -95,6 +43,58 @@ class msDelay {
 
 msDelay.__initmsDelay()
 
+//  On start is a initialization block.
+function collision() {
+    let dist: number;
+    
+    //  Enemy Bullets
+    for (let value of sprites.allOfKind(SpriteKind.EnemyProjectile)) {
+        //  Step 1 Check whether the sprite is in view - if not destroy it.
+        dist = calcDist(value.x, value.y, scene.screenWidth() / 2, scene.screenHeight() / 2)
+        if (dist >= scene.screenWidth()) {
+            //  # Off screen remove it.
+            sprites.destroy(value)
+            continue
+        }
+        
+        //  Step 2 Check whether the sprites a close too each other - if not skip
+        dist = calcDist(value.x, value.y, PlayerOne.x, PlayerOne.y)
+        if (dist >= 7) {
+            continue
+        }
+        
+        //  Step 3 Check for collision
+        if (PlayerOne.overlapsWith(value)) {
+            value.startEffect(effects.fire, 100)
+            sprites.destroy(value)
+            info.changeLifeBy(-1)
+            screenFlash = true
+        }
+        
+    }
+    //  Player Bullets This is the same as the first for loop but for the player attacking the enemy
+    for (let value1 of sprites.allOfKind(SpriteKind.Projectile)) {
+        dist = calcDist(value1.x, value1.y, scene.screenWidth() / 2, scene.screenHeight() / 2)
+        if (dist >= scene.screenWidth()) {
+            //  # Off screen remove it.
+            sprites.destroy(value1)
+            continue
+        }
+        
+        dist = calcDist(value1.x, value1.y, EnemyOne.x, EnemyOne.y)
+        if (dist >= 7) {
+            continue
+        }
+        
+        if (EnemyOne.overlapsWith(value1)) {
+            value1.startEffect(effects.fire, 100)
+            sprites.destroy(value1)
+            enemyHealth += 0 - 1
+        }
+        
+    }
+}
+
 //  Movement Function.
 //  
 //  This block of code gets executed by the game loop its only job is to check what keys are pressed if a certain key is pressed run.
@@ -124,7 +124,7 @@ function movement() {
     
 }
 
-// This updates the enemy the stage system is here to add more enemies.
+//  This updates the enemy the stage system is here to add more enemies.
 function updateEnemy() {
     let angle: number;
     let tPosX: number;
@@ -133,16 +133,18 @@ function updateEnemy() {
     
     if (EnemyStage == 0) {
         if (enemyFireDelay.passed(2000)) {
-            // # if 2000 ms passed the enemy will shoot.
+            //  # if 2000 ms passed the enemy will shoot.
             angle = 60
             if (Math.percentChance(50)) {
                 angle = -60
             }
             
-            shootBullets(EnemyOne.x, EnemyOne.y, angle, 0, 4)
+            //  1 is the lowest.
+            //  30 max
+            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, 1, 4)
             enemyFireDelay.reset()
         } else if (Math.percentChance(2)) {
-            // # 2% chance to generate a new waypoint.
+            //  # 2% chance to generate a new waypoint.
             if (waypoint == null) {
                 tPosX = Math.round(Math.random() * 100)
                 tPosY = Math.round(Math.random() * 100)
@@ -168,15 +170,15 @@ function updateEnemy() {
     }
     
     if (waypoint != null) {
-        // # IF we have a waypoint we move towards it.
-        // X
+        //  # IF we have a waypoint we move towards it.
+        //  X
         if (EnemyOne.x < waypoint[0]) {
             EnemyOne.x += 1
         } else if (EnemyOne.x > waypoint[0]) {
             EnemyOne.x -= 1
         }
         
-        // Y
+        //  Y
         if (EnemyOne.y < waypoint[1]) {
             EnemyOne.y += 1
         } else if (EnemyOne.y > waypoint[1]) {
@@ -196,7 +198,7 @@ function updateEnemy() {
     
 }
 
-// Players shooting code.
+//  Players shooting code.
 function shoot() {
     let projectile2: Sprite;
     if (controller.A.isPressed()) {
@@ -211,8 +213,8 @@ function shoot() {
     
 }
 
-// Distance Caculation. 
-// Provide x1 and y1 and it'll calculate the distance to x2 and y2
+//  Distance Caculation.
+//  Provide x1 and y1 and it'll calculate the distance to x2 and y2
 function calcDist(posX: number, posY: number, posX1: number, posY1: number): number {
     
     xDiff = posX - posX1
@@ -220,14 +222,15 @@ function calcDist(posX: number, posY: number, posX1: number, posY1: number): num
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
 }
 
-// Event listener for when the players health reaches 0 if so reset game.
+//  Event listener for when the players health reaches 0 if so reset game.
 info.onLifeZero(function on_life_zero() {
     game.reset()
 })
+/** On start here. */
 //  The Maths side can't be done in blocks.
-// This is the pattern shooter for the enemy.
-function shootBullets(posX2: number, posY2: number, angleOffset: number, typeBullet: number, numBullets: number) {
-    let angle: number;
+//  This is the pattern shooter for the enemy.
+function shootBullets(posX2: number, posY2: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number) {
+    let angle2: number;
     let oPosX: number;
     let oPosY: number;
     let velX: number;
@@ -236,38 +239,37 @@ function shootBullets(posX2: number, posY2: number, angleOffset: number, typeBul
     //  Laser Shoot
     if (typeBullet == 0) {
         //  Circle shoot.
-        angle = -180
-        while (angle <= 180) {
-            oPosX = posX2 + 15 * Math.sin(Math.PI * angle / 180)
-            oPosY = posY2 + 15 * (0 - Math.cos(Math.PI * angle / 180))
-            velX = Math.sin(Math.PI * (angle + angleOffset) / 180) * 15
-            velY = (0 - Math.cos(Math.PI * (angle + angleOffset) / 180)) * 15
-            enemyProjectile = sprites.create(assets.image`
-                    EnemyBullet
-                `, SpriteKind.EnemyProjectile)
+        angle2 = -180
+        while (angle2 <= 180) {
+            oPosX = posX2 + distance * Math.sin(Math.PI * angle2 / 180)
+            oPosY = posY2 + distance * (0 - Math.cos(Math.PI * angle2 / 180))
+            velX = Math.sin(Math.PI * (angle2 + angleOffset) / 180) * distance
+            velY = (0 - Math.cos(Math.PI * (angle2 + angleOffset) / 180)) * distance
+            enemyProjectile = sprites.create(assets.image`EnemyBullet `, SpriteKind.EnemyProjectile)
             enemyProjectile.setVelocity(velX, velY)
             enemyProjectile.setPosition(oPosX, oPosY)
-            angle += numBullets * 10
+            angle2 += numBullets * 10
         }
     } else if (typeBullet == 1) {
-        
+        enemyProjectile = sprites.create(assets.image`LaserPixel`, SpriteKind.EnemyProjectile)
+        enemyProjectile.setPosition(posX2, posY2)
     } else {
         
     }
     
 }
 
-// On start here.
 let enemyProjectile : Sprite = null
 let yDiff = 0
 let xDiff = 0
-let waypoint : number[] = null
 let moveSpeed = 0
+let screenFlash = false
 let EnemyStage = 0
 let PlayerOne : Sprite = null
-let EnemyOne : Sprite = null
 let enemyHealth = 0
 let projectile22 = null
+let EnemyOne : Sprite = null
+let waypoint : number[] = null
 let fireDelay = new msDelay()
 let enemyFireDelay = new msDelay()
 enemyHealth = 30
@@ -282,7 +284,6 @@ PlayerOne.setPosition(80, 90)
 PlayerOne.setStayInScreen(true)
 PlayerOne.setScale(0.4, ScaleAnchor.Middle)
 EnemyStage = 0
-let screenFlash = false
 let screenFlashTimer = new msDelay()
 let intro = 1
 info.setLife(3)
@@ -292,6 +293,7 @@ info.setLife(3)
 //  
 //  Handle all the logic related to Collision, Movement and Controls.
 forever(function on_forever() {
+    game.stats = true
     movement()
     shoot()
     collision()
