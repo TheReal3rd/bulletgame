@@ -3,9 +3,8 @@ namespace SpriteKind {
 }
 
 // Reusable MiliSecond timer.
-// Why? - This is a better and more consistant compared to using a counter / tick delay system.
-// This is beacuse its fixed on the speed of the CPU. not the current time. Meaning when the CPU is slowed down the
-// counter it slowed down.
+// Why? - Tick or counter delays depends on the CPU speed and how busy it is. This fixes issues that it causes.
+// Because it doesn't depend on CPU speed.
 class msDelay {
     static counter: number
     private ___counter_is_set: boolean
@@ -141,7 +140,7 @@ function updateEnemy() {
             
             //  1 is the lowest.
             //  30 max
-            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, 0, 4)
+            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, fireType, 4)
             enemyFireDelay.reset()
         } else if (Math.percentChance(2)) {
             //  # 2% chance to generate a new waypoint.
@@ -159,6 +158,13 @@ function updateEnemy() {
                     waypoint = [tPosX, tPosY]
                 }
                 
+            }
+            
+        } else if (Math.percentChance(0.001)) {
+            if (fireType == 0) {
+                fireType = 1
+            } else {
+                fireType = 0
             }
             
         }
@@ -203,9 +209,7 @@ function shoot() {
     let projectile2: Sprite;
     if (controller.A.isPressed()) {
         if (fireDelay.passed(500)) {
-            projectile2 = sprites.createProjectileFromSprite(assets.image`
-                PlayerBullet
-            `, PlayerOne, 0, -50)
+            projectile2 = sprites.createProjectileFromSprite(assets.image`PlayerBullet`, PlayerOne, 0, -50)
             fireDelay.reset()
         }
         
@@ -221,6 +225,33 @@ function calcDist(posX: number, posY: number, posX1: number, posY1: number): num
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
 }
 
+// Calculates the angle from one position to another.
+function calcAngle(posX: number, posY: number, posX1: number, posY1: number): number {
+    let xDiff = posX - posX1
+    let yDiff = posY - posY1
+    let dist = Math.sqrt(xDiff * xDiff + yDiff * yDiff)
+    return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
+}
+
+// Copied from Java Math library due to it not exist in this Math lib
+function wrapDegrees(degrees: number): number {
+    let d = degrees % 360.0
+    if (d >= 180.0) {
+        d -= 360.0
+    }
+    
+    if (d < -180.0) {
+        d += 360.0
+    }
+    
+    return d
+}
+
+// Copied from Java Math library due to it not exist in this Math lib 
+function toDegrees(rot: number): number {
+    return rot * 57.29577951308232
+}
+
 //  Event listener for when the players health reaches 0 if so reset game.
 info.onLifeZero(function on_life_zero() {
     game.reset()
@@ -234,7 +265,9 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
     let velX: number;
     let velY: number;
     let enemyProjectile: Sprite;
-    //  Laser Shoot
+    let angle: number;
+    let xVel: number;
+    let yVel: number;
     if (typeBullet == 0) {
         //  Circle shoot.
         angle2 = -180
@@ -249,10 +282,20 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
             angle2 += numBullets * 10
         }
     } else if (typeBullet == 1) {
-        enemyProjectile = sprites.create(assets.image`LaserPixel`, SpriteKind.EnemyProjectile)
-        enemyProjectile.setPosition(posX2, posY2)
-    } else {
-        
+        //  Laser Shoot
+        angle = calcAngle(EnemyOne.x - EnemyOne.width / 2, EnemyOne.y - EnemyOne.height / 2, PlayerOne.x - PlayerOne.width / 2, PlayerOne.y - PlayerOne.height / 2) * 0.017453292519943295
+        for (let x = -6; x < 6; x++) {
+            enemyProjectile = sprites.create(assets.image`LaserPixel`, SpriteKind.EnemyProjectile)
+            if (!(angle <= 1.8 && angle >= 0.8 || angle <= -1.8 && angle >= -0.8)) {
+                enemyProjectile.setPosition(posX2 + x * enemyProjectile.width, posY2)
+            } else {
+                enemyProjectile.setPosition(posX2, posY2 + x * enemyProjectile.height)
+            }
+            
+            xVel = Math.sin(angle) * 50
+            yVel = Math.cos(angle) * 50
+            enemyProjectile.setVelocity(xVel, yVel)
+        }
     }
     
 }
@@ -281,6 +324,7 @@ EnemyStage = 0
 let screenFlashTimer = new msDelay()
 let intro = 1
 info.setLife(3)
+let fireType = 0
 //  Game Loop
 //  
 //  Block of instructions that must be ran every game tick / frame.

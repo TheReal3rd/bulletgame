@@ -3,9 +3,8 @@ class SpriteKind:
     EnemyProjectile = SpriteKind.create()
 
 #Reusable MiliSecond timer.
-#Why? - This is a better and more consistant compared to using a counter / tick delay system.
-#This is beacuse its fixed on the speed of the CPU. not the current time. Meaning when the CPU is slowed down the
-#counter it slowed down.
+#Why? - Tick or counter delays depends on the CPU speed and how busy it is. This fixes issues that it causes.
+#Because it doesn't depend on CPU speed.
 class msDelay():
     counter = None
 
@@ -60,7 +59,7 @@ def collision():
 # 
 # This block of code gets executed by the game loop its only job is to check what keys are pressed if a certain key is pressed run.
 def movement():
-    global moveSpeed
+    global moveSpeed, fireType
     if controller.B.is_pressed():
         moveSpeed = 1
     else:
@@ -75,7 +74,7 @@ def movement():
         PlayerOne.x += moveSpeed
 # This updates the enemy the stage system is here to add more enemies.
 def updateEnemy():
-    global waypoint, EnemyStage, EnemyOne
+    global waypoint, EnemyStage, EnemyOne, fireType
     if EnemyStage == 0:
         if enemyFireDelay.passed(2000):
             # # if 2000 ms passed the enemy will shoot.
@@ -84,7 +83,7 @@ def updateEnemy():
                 angle = -60
             # 1 is the lowest.
             # 30 max
-            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, 0, 4)
+            shootBullets(EnemyOne.x, EnemyOne.y, 15, angle, fireType, 4)
             enemyFireDelay.reset()
         elif Math.percent_chance(2):
             # # 2% chance to generate a new waypoint.
@@ -100,6 +99,11 @@ def updateEnemy():
                 distToPlayer = calcDist(tPosX, tPosY, PlayerOne.x, PlayerOne.y)
                 if distToPlayer >= 60:
                     waypoint = [tPosX, tPosY]
+        elif Math.percent_chance(0.001):
+            if fireType == 0:
+                fireType = 1
+            else:
+                fireType = 0
     elif EnemyStage == 1:
         pass
     else:
@@ -125,9 +129,7 @@ def updateEnemy():
 def shoot():
     if controller.A.is_pressed():
         if fireDelay.passed(500):
-            projectile2 = sprites.create_projectile_from_sprite(assets.image("""
-                PlayerBullet
-            """), PlayerOne, 0, -50)
+            projectile2 = sprites.create_projectile_from_sprite(assets.image("""PlayerBullet"""), PlayerOne, 0, -50)
             fireDelay.reset()
 # Distance Caculation.
 # Provide x1 and y1 and it'll calculate the distance to x2 and y2
@@ -135,8 +137,28 @@ def calcDist(posX: number, posY: number, posX1: number, posY1: number):
     xDiff = posX - posX1
     yDiff = posY - posY1
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
-# Event listener for when the players health reaches 0 if so reset game.
 
+#Calculates the angle from one position to another.
+def calcAngle(posX: number, posY: number, posX1: number, posY1: number):
+    xDiff = posX - posX1
+    yDiff = posY - posY1
+    dist = Math.sqrt(xDiff * xDiff + yDiff * yDiff)
+    return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
+
+#Copied from Java Math library due to it not exist in this Math lib
+def wrapDegrees(degrees):
+    d = degrees % 360.0;
+    if (d >= 180.0):
+        d -= 360.0;
+    if (d < -180.0):
+        d += 360.0;
+    return d;
+
+#Copied from Java Math library due to it not exist in this Math lib 
+def toDegrees(rot):
+    return rot * 57.29577951308232
+
+# Event listener for when the players health reaches 0 if so reset game.
 def on_life_zero():
     game.reset()
 info.on_life_zero(on_life_zero)
@@ -144,7 +166,6 @@ info.on_life_zero(on_life_zero)
 # The Maths side can't be done in blocks.
 # This is the pattern shooter for the enemy.
 def shootBullets(posX2: number, posY2: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number):
-    # Laser Shoot
     if typeBullet == 0:
         # Circle shoot.
         angle2 = -180
@@ -158,10 +179,18 @@ def shootBullets(posX2: number, posY2: number, distance: number, angleOffset: nu
             enemyProjectile.set_velocity(velX, velY)
             angle2 += numBullets * 10
     elif typeBullet == 1:
-        enemyProjectile = sprites.create(assets.image("""LaserPixel"""),SpriteKind.EnemyProjectile)
-        enemyProjectile.set_position(posX2, posY2)
-    else:
-        pass
+        # Laser Shoot
+        angle = calcAngle(EnemyOne.x - (EnemyOne.width / 2), EnemyOne.y - (EnemyOne.height / 2), PlayerOne.x- (PlayerOne.width / 2), PlayerOne.y - (PlayerOne.height / 2)) * 0.017453292519943295
+        for x in range(-6, 6):
+            enemyProjectile = sprites.create(assets.image("""LaserPixel"""),SpriteKind.EnemyProjectile)
+            if not (angle <= 1.8 and angle >= 0.8  or angle <= -1.8 and angle >= -0.8 ):
+                enemyProjectile.set_position(posX2 + (x * enemyProjectile.width), posY2)
+            else:
+                enemyProjectile.set_position(posX2, posY2 + (x * enemyProjectile.height))
+            xVel = Math.sin(angle) * 50
+            yVel = Math.cos(angle) * 50
+            enemyProjectile.set_velocity(xVel, yVel)
+
 moveSpeed = 0
 screenFlash = False
 EnemyStage = 0
@@ -186,6 +215,7 @@ EnemyStage = 0
 screenFlashTimer = msDelay()
 intro = 1
 info.set_life(3)
+fireType = 0
 # Game Loop
 # 
 # Block of instructions that must be ran every game tick / frame.
