@@ -23,19 +23,14 @@ class msDelay():
 # On start is a initialization block.
 def collision():
     global screenFlash, enemyHealth
+    #I prefer to create my own destroy system but this fixes a possible memory issue? IDK as i can't see memory usage or any readouts.
     # Enemy Bullets
     for value in sprites.all_of_kind(SpriteKind.EnemyProjectile):
-        # Step 1 Check whether the sprite is in view - if not destroy it.
-        dist = calcDist(value.x,value.y,scene.screen_width() / 2,scene.screen_height() / 2)
-        if dist >= scene.screen_width():
-            # # Off screen remove it.
-            sprites.destroy(value)
-            continue
-        # Step 2 Check whether the sprites a close too each other - if not skip
-        dist = calcDist(value.x, value.y, playerOne.x, playerOne.y)
+        # Step 1 Check whether the sprites a close too each other - if not skip
+        dist = Math.round(calcDist(value.x, value.y, playerOne.x, playerOne.y))
         if dist >= 10:
             continue
-        # Step 3 Check for collision
+        # Step 2 Check for collision
         if playerOne.overlaps_with(value):
             value.start_effect(effects.fire, 100)
             sprites.destroy(value)
@@ -44,11 +39,6 @@ def collision():
             screenFlashTimer.reset()
     # Player Bullets This is the same as the first for loop but for the player attacking the enemy
     for value1 in sprites.all_of_kind(SpriteKind.projectile):
-        dist = calcDist(value1.x,value1.y,scene.screen_width() / 2,scene.screen_height() / 2)
-        if dist >= scene.screen_width():
-            # # Off screen remove it.
-            sprites.destroy(value1)
-            continue
         dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
         if dist >= 10:
             continue
@@ -211,12 +201,14 @@ def shootBullets(posX2: number, posY2: number, distance: number, angleOffset: nu
             enemyProjectile = sprites.create(assets.image("""EnemyBullet """),SpriteKind.EnemyProjectile)
             enemyProjectile.set_position(oPosX, oPosY)
             enemyProjectile.set_velocity(velX, velY)
+            enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
             angle2 += numBullets * 10
     elif typeBullet == 1:
         # Laser Shoot
         angle = calcAngle(enemyOne.x - (enemyOne.width / 2), enemyOne.y - (enemyOne.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) * 0.017453292519943295
         for x in range(-6, 6):
             enemyProjectile = sprites.create(assets.image("""LaserPixel"""),SpriteKind.EnemyProjectile)
+            enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
             if not (angle <= 1.8 and angle >= 0.8  or angle <= -1.8 and angle >= -0.8 ):
                 enemyProjectile.set_position(posX2 + (x * enemyProjectile.width), posY2)
             else:
@@ -261,7 +253,7 @@ fireType = 0
 # Handle all the logic related to Collision, Movement and Controls.
 def on_forever():
     game.stats = True
-    updatePlayer()
     collision()
+    updatePlayer()
     updateEnemy()
 forever(on_forever)
