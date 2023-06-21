@@ -38,12 +38,6 @@ fccdcccbbbcf..ff
 ................
 ................
 `;
-            case "image5":
-            case "LaserPixel":return img`
-2 2 2 
-2 2 2 
-2 2 2 
-`;
             case "image3":
             case "EnemyNormal":return img`
 ........................
@@ -223,6 +217,19 @@ c a a a a c
 c a a a a c 
 . c a a c . 
 . . c c . . 
+`;
+            case "image5":
+            case "LaserPixel":return img`
+2 2 2 
+2 2 2 
+2 2 2 
+`;
+            case "image11":
+            case "EnemyFlak":return img`
+. 5 5 . 
+5 4 4 5 
+5 4 4 5 
+. 5 5 . 
 `;
         }
         return null;

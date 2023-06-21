@@ -2,6 +2,10 @@ namespace SpriteKind {
     export const EnemyProjectile = SpriteKind.create()
 }
 
+namespace SpriteKind {
+    export const EnemyProjFlak = SpriteKind.create()
+}
+
 // Reusable MiliSecond timer.
 // Why? - Tick or counter delays depends on the CPU speed and how busy it is. This fixes issues that it causes.
 // Because it doesn't depend on CPU speed.
@@ -48,23 +52,27 @@ function collision() {
     
     // I prefer to create my own destroy system but this fixes a possible memory issue? IDK as i can't see memory usage or any readouts.
     //  Enemy Bullets
-    for (let value of sprites.allOfKind(SpriteKind.EnemyProjectile)) {
-        //  Step 1 Check whether the sprites a close too each other - if not skip
-        dist = Math.round(calcDist(value.x, value.y, playerOne.x, playerOne.y))
-        if (dist >= 10) {
-            continue
+    if (!screenFlash) {
+        for (let value of sprites.allOfKind(SpriteKind.EnemyProjectile)) {
+            //  Step 1 Check whether the bullet is near the player. if it isn't its definalty not touching the player. So we skip.
+            dist = Math.round(calcDist(value.x, value.y, playerOne.x, playerOne.y))
+            if (dist >= 10) {
+                continue
+            }
+            
+            //  Step 2 Check if the player is overlapping the byullet if so we apply damage.
+            if (playerOne.overlapsWith(value)) {
+                value.startEffect(effects.fire, 100)
+                sprites.destroy(value)
+                info.changeLifeBy(-1)
+                screenFlash = true
+                screenFlashTimer.reset()
+                break
+            }
+            
         }
-        
-        //  Step 2 Check for collision
-        if (playerOne.overlapsWith(value)) {
-            value.startEffect(effects.fire, 100)
-            sprites.destroy(value)
-            info.changeLifeBy(-1)
-            screenFlash = true
-            screenFlashTimer.reset()
-        }
-        
     }
+    
     //  Player Bullets This is the same as the first for loop but for the player attacking the enemy
     for (let value1 of sprites.allOfKind(SpriteKind.Projectile)) {
         dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
@@ -80,17 +88,30 @@ function collision() {
         }
         
     }
+    //  Special loop for the Flak bullet. It simply checks if the bullet is near the player if so and meets range requirements it explodes.
+    for (let value2 of sprites.allOfKind(SpriteKind.EnemyProjFlak)) {
+        dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
+        if (dist >= 25) {
+            continue
+        } else {
+            value2.startEffect(effects.fire, 100)
+            sprites.destroy(value2)
+            shootBullets(value2.x, value2.y, 15, 5, 0, 0, 6)
+        }
+        
+    }
 }
 
 //  PlayerUpdate this will only contain code related to the player.
 function updatePlayer() {
+    let delay: number;
     let projectile2: Sprite;
     
     // Slow move switch
-    if (controller.B.isPressed()) {
-        moveSpeed = 1
+    let isBPressed = controller.B.isPressed()
+    if (isBPressed) {
+        moveSpeed = 0.5
     } else {
-        // #TODO add a foreward facing shield.
         moveSpeed = 2
     }
     
@@ -113,13 +134,19 @@ function updatePlayer() {
     
     // Shooting
     if (controller.A.isPressed()) {
-        if (fireDelay.passed(500)) {
+        delay = 500
+        if (isBPressed) {
+            delay = 200
+        }
+        
+        if (fireDelay.passed(delay)) {
             projectile2 = sprites.createProjectileFromSprite(assets.image`PlayerBullet`, playerOne, 0, -50)
             fireDelay.reset()
         }
         
     }
     
+    // Screenflash
     if (screenFlash) {
         scene.setBackgroundColor(2)
         if (screenFlashTimer.passed(200)) {
@@ -133,7 +160,9 @@ function updatePlayer() {
 
 //  This updates the enemy the stage system is here to add more enemies.
 function updateEnemy() {
+    let numBullets: number;
     let angle: number;
+    let speed: number;
     let tPosX: number;
     let tPosY: number;
     let distToPlayer: number;
@@ -144,21 +173,37 @@ function updateEnemy() {
         if (enemyStage == 0) {
             // Stage 1
             if (enemyFireDelay.passed(2000)) {
-                //  # if 2000 ms passed the enemy will shoot.
-                angle = 60
-                if (Math.percentChance(50)) {
-                    angle = -60
+                // Get the number of bullets to shoot. This is based on the type it'll be shooting.
+                numBullets = null
+                if (fireType == 0) {
+                    numBullets = 4
+                    angle = 60
+                    if (Math.percentChance(50)) {
+                        angle = -60
+                    }
+                    
+                } else {
+                    angle = 0
+                    numBullets = 6
                 }
                 
-                //  1 is the lowest.
-                //  30 max
-                shootBullets(enemyOne.x, enemyOne.y, 15, angle, fireType, 4)
+                // The speed of the bullet. Get changed when the bullet type is changed.
+                speed = 15
+                if (fireType == 1) {
+                    speed = 50
+                } else if (fireType == 2) {
+                    speed = 90
+                }
+                
+                // Shoot and reset delays.
+                shootBullets(enemyOne.x, enemyOne.y, speed, 15, angle, fireType, numBullets)
                 enemyOne.setImage(assets.image`EnemyShoot`)
                 enemyAnimDelay.reset()
                 enemyFireDelay.reset()
             } else if (Math.percentChance(2)) {
                 //  2% chance to generate a new waypoint.
                 if (waypoint == null) {
+                    // If we already have a waypoint don't create a new one.
                     tPosX = Math.round(Math.random() * 100)
                     tPosY = Math.round(Math.random() * 100)
                     //  Min check
@@ -175,6 +220,7 @@ function updateEnemy() {
                 }
                 
             } else if (Math.percentChance(0.001)) {
+                // 0.001 chance to change the type of bullet to be shot.
                 if (fireType == 0) {
                     fireType = 1
                 } else {
@@ -182,25 +228,38 @@ function updateEnemy() {
                 }
                 
             } else if (enemyAnimDelay.passed(500)) {
+                // Animation reset.
                 enemyOne.setImage(enemyNormalImage)
             }
             
         } else if (enemyStage == 1) {
-            // Stage 2
-            if (enemyFireDelay.passed(1200)) {
-                angle = 80
-                if (Math.percentChance(50)) {
-                    angle = -80
+            // Stage 2 Same as stage 1 but shoot faster, move more frequantly and more.
+            if (enemyFireDelay.passed(1500)) {
+                numBullets = null
+                if (fireType == 0) {
+                    numBullets = 4
+                    angle = 80
+                    if (Math.percentChance(50)) {
+                        angle = -80
+                    }
+                    
+                } else {
+                    angle = 0
+                    numBullets = 7
                 }
                 
-                //  1 is the lowest.
-                //  30 max
-                shootBullets(enemyOne.x, enemyOne.y, 15, angle, fireType, 3)
+                speed = 15
+                if (fireType == 1) {
+                    speed = 50
+                } else if (fireType == 2) {
+                    speed = 90
+                }
+                
+                shootBullets(enemyOne.x, enemyOne.y, speed, 15, angle, fireType, numBullets)
                 enemyOne.setImage(assets.image`EnemyShootAgro`)
                 enemyAnimDelay.reset()
                 enemyFireDelay.reset()
             } else if (Math.percentChance(4)) {
-                //  2% chance to generate a new waypoint.
                 if (waypoint == null) {
                     tPosX = Math.round(Math.random() * 100)
                     tPosY = Math.round(Math.random() * 100)
@@ -211,16 +270,15 @@ function updateEnemy() {
                     tPosX = Math.max(tPosX, 0)
                     tPosY = Math.max(tPosY, 0)
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
-                    if (distToPlayer >= 30) {
+                    if (distToPlayer >= 35) {
                         waypoint = [tPosX, tPosY]
                     }
                     
                 }
                 
             } else if (Math.percentChance(8)) {
-                if (fireType == 0) {
-                    fireType = 1
-                } else {
+                fireType += 1
+                if (fireType >= 3) {
                     fireType = 0
                 }
                 
@@ -229,6 +287,7 @@ function updateEnemy() {
             }
             
         } else {
+            // Final stage is beaten send win screen.
             info.setScore(score)
             game.setGameOverMessage(true, "GAMEOVER! YOU WIN!")
             game.gameOver(true)
@@ -237,7 +296,7 @@ function updateEnemy() {
     }
     
     if (waypoint != null) {
-        //  # IF we have a waypoint we move towards it.
+        // If we have a waypoint we move towards it. This also applies animations to the enemy.
         setImage = false
         //  X
         if (enemyOne.x < waypoint[0]) {
@@ -284,6 +343,7 @@ function updateEnemy() {
         }
         
         if (Math.round(calcDist(enemyOne.x, enemyOne.y, waypoint[0], waypoint[1])) <= 1) {
+            // If we're 1 pixel away we have reached the waypoint. So we remove the waypoint to a None.
             if (isAgro) {
                 enemyNormalImage = assets.image`EnemyNormalAgro`
             } else {
@@ -297,8 +357,10 @@ function updateEnemy() {
     }
     
     if (enemyHealth <= 0) {
+        // Checks if the enemy is dead if so next stage. If its end stage it'll destroy the enemy.
+        info.setLife(info.life() + 3)
         enemyStage += 1
-        enemyHealth = 60
+        enemyHealth = 30
         if (!isAgro) {
             isAgro = true
         } else {
@@ -309,8 +371,7 @@ function updateEnemy() {
     
 }
 
-//  Distance Caculation.
-//  Provide x1 and y1 and it'll calculate the distance to x2 and y2
+//  Distance Calculation. Distance from pos1 to pos2
 function calcDist(posX: number, posY: number, posX1: number, posY1: number): number {
     let xDiff = posX - posX1
     let yDiff = posY - posY1
@@ -318,14 +379,14 @@ function calcDist(posX: number, posY: number, posX1: number, posY1: number): num
 }
 
 // Calculates the angle from one position to another.
-function calcAngle(posX: number, posY: number, posX1: number, posY1: number): number {
+function calcAngle(posX: number, posY: number, posX1: number, posY1: number) {
     let xDiff = posX - posX1
     let yDiff = posY - posY1
     return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
 }
 
 // Copied from Java Math library due to it not exist in this Math lib
-function wrapDegrees(degrees: number): number {
+function wrapDegrees(degrees: number) {
     let d = degrees % 360.0
     if (d >= 180.0) {
         d -= 360.0
@@ -343,7 +404,7 @@ function toDegrees(rot: number): number {
     return rot * 57.29577951308232
 }
 
-//  Event listener for when the players health reaches 0 if so reset game.
+//  Event listener for when the players health reaches 0 if so show lose screen.
 info.onLifeZero(function on_life_zero() {
     
     info.setScore(score)
@@ -352,7 +413,7 @@ info.onLifeZero(function on_life_zero() {
 })
 //  The Maths side can't be done in blocks.
 //  This is the pattern shooter for the enemy.
-function shootBullets(posX2: number, posY2: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number) {
+function shootBullets(posX2: number, posY2: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number) {
     let angle2: number;
     let oPosX: number;
     let oPosY: number;
@@ -366,8 +427,8 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
         while (angle2 <= 180) {
             oPosX = posX2 + distance * Math.sin(Math.PI * angle2 / 180)
             oPosY = posY2 + distance * (0 - Math.cos(Math.PI * angle2 / 180))
-            velX = Math.sin(Math.PI * (angle2 + angleOffset) / 180) * distance
-            velY = (0 - Math.cos(Math.PI * (angle2 + angleOffset) / 180)) * distance
+            velX = Math.sin(Math.PI * (angle2 + angleOffset) / 180) * speed
+            velY = (0 - Math.cos(Math.PI * (angle2 + angleOffset) / 180)) * speed
             enemyProjectile = sprites.create(assets.image`EnemyBullet `, SpriteKind.EnemyProjectile)
             enemyProjectile.setPosition(oPosX, oPosY)
             enemyProjectile.setVelocity(velX, velY)
@@ -376,8 +437,8 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
         }
     } else if (typeBullet == 1) {
         //  Laser Shoot
-        angle = calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
-        for (let x = -6; x < 6; x++) {
+        angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
+        for (let x = -numBullets; x < numBullets; x++) {
             enemyProjectile = sprites.create(assets.image`LaserPixel`, SpriteKind.EnemyProjectile)
             enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
             if (!(angle <= 1.8 && angle >= 0.8 || angle <= -1.8 && angle >= -0.8)) {
@@ -386,17 +447,23 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
                 enemyProjectile.setPosition(posX2, posY2 + x * enemyProjectile.height)
             }
             
-            velX = Math.sin(angle) * 50
-            velY = Math.cos(angle) * 50
+            velX = Math.sin(angle) * speed
+            velY = Math.cos(angle) * speed
             enemyProjectile.setVelocity(velX, velY)
         }
     } else if (typeBullet == 2) {
-        
+        // Flak Shot Will explode when near a player of a cirle shot.
+        enemyProjectile = sprites.create(assets.image`EnemyFlak`, SpriteKind.EnemyProjFlak)
+        enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
+        enemyProjectile.setPosition(posX2, posY2)
+        angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
+        velX = Math.sin(angle) * speed
+        velY = Math.cos(angle) * speed
+        enemyProjectile.setVelocity(velX, velY)
     }
     
 }
 
-// TODO add another shooter type.
 let moveSpeed = 0
 let screenFlash = false
 let playerOne : Sprite = null

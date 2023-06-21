@@ -4,11 +4,6 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "myImage"
     },
-    "image5": {
-        "data": "hwQDAAMAAAAiAgAAIgIAACICAAA=",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "LaserPixel"
-    },
     "image3": {
         "data": "hwQYABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8P8AAAAAAAAAAAAAwLEAAAAAAAAA//8PH/sAAAAAAAD/3b38H7EAAAAAAPAbEd29H/sAAAAAAPAREb0czPEPAAAAAB8REfEfvf8PAAAAAB8REdER+///AAAAAB8REdERsf//AAAAAB8REfEf+///AAAAAPAREb0czbEPAAAAAPAbEd29H/sAAAAAAAD/3b38H7EAAAAAAAAA//8PH/sAAAAAAAAAAAAAz7EAAAAAAAAAAAAA8P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
         "mimeType": "image/x-mkcd-f4",
@@ -48,6 +43,16 @@
         "data": "hwQGAAYAAAAAzAAAwKoMAKyqygCsqsoAwKoMAADMAAA=",
         "mimeType": "image/x-mkcd-f4",
         "displayName": "PlayerBullet"
+    },
+    "image5": {
+        "data": "hwQDAAMAAAAiAgAAIgIAACICAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "LaserPixel"
+    },
+    "image11": {
+        "data": "hwQEAAQAAABQBQAARVQAAEVUAABQBQAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "EnemyFlak"
     },
     "*": {
         "mimeType": "image/x-mkcd-f4",
