@@ -76,6 +76,7 @@ function collision() {
             value1.startEffect(effects.fire, 100)
             sprites.destroy(value1)
             enemyHealth += 0 - 1
+            score += 100
         }
         
     }
@@ -141,6 +142,7 @@ function updateEnemy() {
     info.setScore(enemyHealth)
     if (!intro) {
         if (enemyStage == 0) {
+            // Stage 1
             if (enemyFireDelay.passed(2000)) {
                 //  # if 2000 ms passed the enemy will shoot.
                 angle = 60
@@ -184,9 +186,52 @@ function updateEnemy() {
             }
             
         } else if (enemyStage == 1) {
+            // Stage 2
+            if (enemyFireDelay.passed(1200)) {
+                angle = 80
+                if (Math.percentChance(50)) {
+                    angle = -80
+                }
+                
+                //  1 is the lowest.
+                //  30 max
+                shootBullets(enemyOne.x, enemyOne.y, 15, angle, fireType, 3)
+                enemyOne.setImage(assets.image`EnemyShootAgro`)
+                enemyAnimDelay.reset()
+                enemyFireDelay.reset()
+            } else if (Math.percentChance(4)) {
+                //  2% chance to generate a new waypoint.
+                if (waypoint == null) {
+                    tPosX = Math.round(Math.random() * 100)
+                    tPosY = Math.round(Math.random() * 100)
+                    //  Min check
+                    tPosX = Math.min(tPosX, scene.screenWidth())
+                    tPosY = Math.min(tPosY, scene.screenHeight())
+                    //  Max check
+                    tPosX = Math.max(tPosX, 0)
+                    tPosY = Math.max(tPosY, 0)
+                    distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
+                    if (distToPlayer >= 30) {
+                        waypoint = [tPosX, tPosY]
+                    }
+                    
+                }
+                
+            } else if (Math.percentChance(8)) {
+                if (fireType == 0) {
+                    fireType = 1
+                } else {
+                    fireType = 0
+                }
+                
+            } else if (enemyAnimDelay.passed(500)) {
+                enemyOne.setImage(enemyNormalImage)
+            }
             
         } else {
-            game.setGameOverMessage(true, "GAME OVER!")
+            info.setScore(score)
+            game.setGameOverMessage(true, "GAMEOVER! YOU WIN!")
+            game.gameOver(true)
         }
         
     }
@@ -215,21 +260,36 @@ function updateEnemy() {
         if (enemyOne.y < waypoint[1]) {
             enemyOne.y += 1
             if (!setImage) {
-                enemyNormalImage = assets.image`EnemyNormal`
+                if (isAgro) {
+                    enemyNormalImage = assets.image`EnemyNormalAgro`
+                } else {
+                    enemyNormalImage = assets.image`EnemyNormal`
+                }
+                
                 setImage = true
             }
             
         } else if (enemyOne.y > waypoint[1]) {
             enemyOne.y -= 1
             if (!setImage) {
-                enemyNormalImage = assets.image`EnemyNormal`
+                if (isAgro) {
+                    enemyNormalImage = assets.image`EnemyNormalAgro`
+                } else {
+                    enemyNormalImage = assets.image`EnemyNormal`
+                }
+                
                 setImage = true
             }
             
         }
         
         if (Math.round(calcDist(enemyOne.x, enemyOne.y, waypoint[0], waypoint[1])) <= 1) {
-            enemyNormalImage = assets.image`EnemyNormal`
+            if (isAgro) {
+                enemyNormalImage = assets.image`EnemyNormalAgro`
+            } else {
+                enemyNormalImage = assets.image`EnemyNormal`
+            }
+            
             waypoint = null
             intro = false
         }
@@ -237,8 +297,14 @@ function updateEnemy() {
     }
     
     if (enemyHealth <= 0) {
-        enemyStage = 1
-        sprites.destroy(enemyOne)
+        enemyStage += 1
+        enemyHealth = 60
+        if (!isAgro) {
+            isAgro = true
+        } else {
+            sprites.destroy(enemyOne)
+        }
+        
     }
     
 }
@@ -255,7 +321,6 @@ function calcDist(posX: number, posY: number, posX1: number, posY1: number): num
 function calcAngle(posX: number, posY: number, posX1: number, posY1: number): number {
     let xDiff = posX - posX1
     let yDiff = posY - posY1
-    let dist = Math.sqrt(xDiff * xDiff + yDiff * yDiff)
     return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
 }
 
@@ -280,7 +345,10 @@ function toDegrees(rot: number): number {
 
 //  Event listener for when the players health reaches 0 if so reset game.
 info.onLifeZero(function on_life_zero() {
-    game.reset()
+    
+    info.setScore(score)
+    game.setGameOverMessage(true, "GAME OVER! YOU LOSE!")
+    game.gameOver(true)
 })
 //  The Maths side can't be done in blocks.
 //  This is the pattern shooter for the enemy.
@@ -332,12 +400,11 @@ function shootBullets(posX2: number, posY2: number, distance: number, angleOffse
 let moveSpeed = 0
 let screenFlash = false
 let playerOne : Sprite = null
-let enemyHealth = 0
+let enemyHealth = 30
 let enemyOne : Sprite = null
 let waypoint = [80, 15]
 let fireDelay = new msDelay()
 let enemyFireDelay = new msDelay()
-enemyHealth = 30
 enemyOne = sprites.create(assets.image`
     EnemyNormal
 `, SpriteKind.Enemy)
@@ -355,6 +422,8 @@ let enemyAnimDelay = new msDelay()
 let intro = true
 info.setLife(3)
 let fireType = 0
+let isAgro = false
+let score = 0
 //  Game Loop
 // 
 //  Block of instructions that must be ran every game tick / frame.

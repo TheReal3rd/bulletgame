@@ -22,7 +22,7 @@ class msDelay():
 
 # On start is a initialization block.
 def collision():
-    global screenFlash, enemyHealth
+    global screenFlash, enemyHealth, score
     #I prefer to create my own destroy system but this fixes a possible memory issue? IDK as i can't see memory usage or any readouts.
     # Enemy Bullets
     for value in sprites.all_of_kind(SpriteKind.EnemyProjectile):
@@ -46,6 +46,7 @@ def collision():
             value1.start_effect(effects.fire, 100)
             sprites.destroy(value1)
             enemyHealth += 0 - 1
+            score += 100
 
 # PlayerUpdate this will only contain code related to the player.
 def updatePlayer():
@@ -78,10 +79,10 @@ def updatePlayer():
 
 # This updates the enemy the stage system is here to add more enemies.
 def updateEnemy():
-    global waypoint, enemyStage, enemyOne, fireType, enemyHealth, enemyNormalImage, intro
+    global waypoint, enemyStage, enemyOne, fireType, enemyHealth, enemyNormalImage, intro, isAgro, score
     info.set_score(enemyHealth)
     if not intro:
-        if enemyStage == 0:
+        if enemyStage == 0:#Stage 1
             if enemyFireDelay.passed(2000):
                 # # if 2000 ms passed the enemy will shoot.
                 angle = 60
@@ -112,13 +113,44 @@ def updateEnemy():
                     fireType = 1
                 else:
                     fireType = 0
-            else:
-                if(enemyAnimDelay.passed(500)):
-                    enemyOne.set_image(enemyNormalImage)
-        elif enemyStage == 1:
-            pass
+            elif(enemyAnimDelay.passed(500)):
+                enemyOne.set_image(enemyNormalImage)
+        elif enemyStage == 1:#Stage 2
+            if enemyFireDelay.passed(1200):
+                angle = 80
+                if Math.percent_chance(50):
+                    angle = -80
+                # 1 is the lowest.
+                # 30 max
+                shootBullets(enemyOne.x, enemyOne.y, 15, angle, fireType, 3)
+                enemyOne.set_image(assets.image("""EnemyShootAgro"""))
+                enemyAnimDelay.reset()
+                enemyFireDelay.reset()
+            elif Math.percent_chance(4):
+                # 2% chance to generate a new waypoint.
+                if waypoint == None:
+                    tPosX = Math.round(Math.random() * 100)
+                    tPosY = Math.round(Math.random() * 100)
+                    # Min check
+                    tPosX = min(tPosX, scene.screen_width())
+                    tPosY = min(tPosY, scene.screen_height())
+                    # Max check
+                    tPosX = max(tPosX, 0)
+                    tPosY = max(tPosY, 0)
+                    distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
+                    if distToPlayer >= 30:
+                        waypoint = [tPosX, tPosY]
+            elif Math.percent_chance(8):
+                if fireType == 0:
+                    fireType = 1
+                else:
+                    fireType = 0
+            elif(enemyAnimDelay.passed(500)):
+                enemyOne.set_image(enemyNormalImage)
         else:
-            game.set_game_over_message(True, "GAME OVER!")
+            info.set_score(score)
+            game.set_game_over_message(True, "GAMEOVER! YOU WIN!")
+            game.game_over(True)
 
     if waypoint != None:
         # # IF we have a waypoint we move towards it.
@@ -138,22 +170,35 @@ def updateEnemy():
         if enemyOne.y < waypoint[1]:
             enemyOne.y += 1
             if not setImage:
-                enemyNormalImage = assets.image("""EnemyNormal""")
+                if isAgro:
+                    enemyNormalImage = assets.image("""EnemyNormalAgro""")
+                else:
+                    enemyNormalImage = assets.image("""EnemyNormal""")
                 setImage = True
         elif enemyOne.y > waypoint[1]:
             enemyOne.y -= 1
             if not setImage:
-                enemyNormalImage = assets.image("""EnemyNormal""")
+                if isAgro:
+                    enemyNormalImage = assets.image("""EnemyNormalAgro""")
+                else:
+                    enemyNormalImage = assets.image("""EnemyNormal""")
                 setImage = True
 
         if Math.round(calcDist(enemyOne.x, enemyOne.y, waypoint[0], waypoint[1])) <= 1:
-            enemyNormalImage = assets.image("""EnemyNormal""")
+            if isAgro:
+                enemyNormalImage = assets.image("""EnemyNormalAgro""")
+            else:
+                enemyNormalImage = assets.image("""EnemyNormal""")
             waypoint = None
             intro = False
 
     if enemyHealth <= 0:
-        enemyStage = 1
-        sprites.destroy(enemyOne)
+        enemyStage += 1
+        enemyHealth = 60
+        if not isAgro:
+            isAgro = True
+        else:
+            sprites.destroy(enemyOne)
 
 # Distance Caculation.
 # Provide x1 and y1 and it'll calculate the distance to x2 and y2
@@ -166,7 +211,6 @@ def calcDist(posX: number, posY: number, posX1: number, posY1: number):
 def calcAngle(posX: number, posY: number, posX1: number, posY1: number):
     xDiff = posX - posX1
     yDiff = posY - posY1
-    dist = Math.sqrt(xDiff * xDiff + yDiff * yDiff)
     return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
 
 #Copied from Java Math library due to it not exist in this Math lib
@@ -184,7 +228,10 @@ def toDegrees(rot):
 
 # Event listener for when the players health reaches 0 if so reset game.
 def on_life_zero():
-    game.reset()
+    global score
+    info.set_score(score)
+    game.set_game_over_message(True, "GAME OVER! YOU LOSE!")
+    game.game_over(True)
 info.on_life_zero(on_life_zero)
 
 # The Maths side can't be done in blocks.
@@ -222,12 +269,11 @@ def shootBullets(posX2: number, posY2: number, distance: number, angleOffset: nu
 moveSpeed = 0
 screenFlash = False
 playerOne: Sprite = None
-enemyHealth = 0
+enemyHealth = 30
 enemyOne: Sprite = None
 waypoint: any = (80, 15)
 fireDelay = msDelay()
 enemyFireDelay = msDelay()
-enemyHealth = 30
 enemyOne = sprites.create(assets.image("""
     EnemyNormal
 """), SpriteKind.enemy)
@@ -245,6 +291,8 @@ enemyAnimDelay = msDelay()
 intro = True
 info.set_life(3)
 fireType = 0
+isAgro = False
+score = 0
 
 # Game Loop
 #
