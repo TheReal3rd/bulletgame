@@ -6,9 +6,6 @@ class SpriteKind:
 class SpriteKind:
     EnemyProjFlak = SpriteKind.create()
 
-#Reusable MiliSecond timer.
-#Why? - Tick or counter delays depends on the CPU speed and how busy it is. This fixes issues that it causes.
-#Because it doesn't depend on CPU speed.
 class msDelay():
     counter = None
 
@@ -24,18 +21,13 @@ class msDelay():
     def reset(self):
         self.counter = game.runtime()
 
-# On start is a initialization block.
 def collision():
     global screenFlash, enemyHealth, score
-    #I prefer to create my own destroy system but this fixes a possible memory issue? IDK as i can't see memory usage or any readouts.
-    # Enemy Bullets
     if not screenFlash:
         for value in sprites.all_of_kind(SpriteKind.EnemyProjectile):
-            # Step 1 Check whether the bullet is near the player. if it isn't its definalty not touching the player. So we skip.
             dist = Math.round(calcDist(value.x, value.y, playerOne.x, playerOne.y))
             if dist >= 10:
                 continue
-            # Step 2 Check if the player is overlapping the byullet if so we apply damage.
             if playerOne.overlaps_with(value):
                 value.start_effect(effects.fire, 100)
                 sprites.destroy(value)
@@ -44,7 +36,6 @@ def collision():
                 screenFlashTimer.reset()
                 break
 
-    # Player Bullets This is the same as the first for loop but for the player attacking the enemy
     for value1 in sprites.all_of_kind(SpriteKind.projectile):
         dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
         if dist >= 10:
@@ -54,7 +45,6 @@ def collision():
             sprites.destroy(value1)
             enemyHealth += 0 - 1
             score += 100
-    # Special loop for the Flak bullet. It simply checks if the bullet is near the player if so and meets range requirements it explodes.
     for value2 in sprites.all_of_kind(SpriteKind.EnemyProjFlak):
         dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
         if dist >= 25:
@@ -64,16 +54,14 @@ def collision():
             sprites.destroy(value2)
             shootBullets(value2.x, value2.y, 15, 5, 0, 0, 6)
 
-# PlayerUpdate this will only contain code related to the player.
 def updatePlayer():
     global moveSpeed, fireType, fireDelay, screenFlash, screenFlashTimer
-    #Slow move switch
     isBPressed = controller.B.is_pressed()
     if isBPressed:
         moveSpeed = 0.5
     else:
         moveSpeed = 2
-    #Movement
+
     if controller.down.is_pressed():
         playerOne.y += moveSpeed
     if controller.up.is_pressed():
@@ -82,7 +70,7 @@ def updatePlayer():
         playerOne.x += moveSpeed * -1
     if controller.right.is_pressed():
         playerOne.x += moveSpeed
-    #Shooting
+
     if controller.A.is_pressed():
         delay = 500
         if isBPressed:
@@ -90,22 +78,19 @@ def updatePlayer():
         if fireDelay.passed(delay):
             projectile2 = sprites.create_projectile_from_sprite(assets.image("""PlayerBullet"""), playerOne, 0, -50)
             fireDelay.reset()
-    #Screenflash
+
     if screenFlash:
         scene.set_background_color(2)
         if screenFlashTimer.passed(200):
             scene.set_background_color(0)
             screenFlash = False
 
-
-# This updates the enemy the stage system is here to add more enemies.
 def updateEnemy():
     global waypoint, enemyStage, enemyOne, fireType, enemyHealth, enemyNormalImage, intro, isAgro, score
     info.set_score(enemyHealth)
     if not intro:
         if enemyStage == 0:#Stage 1
-            if enemyFireDelay.passed(2000):
-                #Get the number of bullets to shoot. This is based on the type it'll be shooting.
+            if enemyFireDelay.passed(1500):
                 numBullets = None
                 if(fireType == 0):
                     numBullets = 4
@@ -115,21 +100,18 @@ def updateEnemy():
                 else:
                     angle = 0
                     numBullets = 6
-                #The speed of the bullet. Get changed when the bullet type is changed.
                 speed = 15
                 if fireType == 1:
                     speed = 50
                 elif fireType == 2:
                     speed = 90
 
-                #Shoot and reset delays.
                 shootBullets(enemyOne.x, enemyOne.y, speed, 15, angle, fireType, numBullets)
                 enemyOne.set_image(assets.image("""EnemyShoot"""))
                 enemyAnimDelay.reset()
                 enemyFireDelay.reset()
             elif Math.percent_chance(2): 
-                # 2% chance to generate a new waypoint.
-                if waypoint == None:#If we already have a waypoint don't create a new one.
+                if waypoint == None:
                     tPosX = Math.round(Math.random() * 100)
                     tPosY = Math.round(Math.random() * 100)
                     # Min check
@@ -151,7 +133,7 @@ def updateEnemy():
                 #Animation reset.
                 enemyOne.set_image(enemyNormalImage)
         elif enemyStage == 1:#Stage 2 Same as stage 1 but shoot faster, move more frequantly and more.
-            if enemyFireDelay.passed(1500):
+            if enemyFireDelay.passed(1200):
                 numBullets = None
                 if(fireType == 0):
                     numBullets = 4
@@ -247,19 +229,16 @@ def updateEnemy():
         else:
             sprites.destroy(enemyOne)
 
-# Distance Calculation. Distance from pos1 to pos2
 def calcDist(posX: number, posY: number, posX1: number, posY1: number):
     xDiff = posX - posX1
     yDiff = posY - posY1
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
 
-#Calculates the angle from one position to another.
 def calcAngle(posX: number, posY: number, posX1: number, posY1: number):
     xDiff = posX - posX1
     yDiff = posY - posY1
     return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
 
-#Copied from Java Math library due to it not exist in this Math lib
 def wrapDegrees(degrees):
     d = degrees % 360.0;
     if (d >= 180.0):
@@ -268,7 +247,6 @@ def wrapDegrees(degrees):
         d += 360.0;
     return d;
 
-#Copied from Java Math library due to it not exist in this Math lib
 def toDegrees(rot):
     return rot * 57.29577951308232
 
@@ -280,8 +258,6 @@ def on_life_zero():
     game.game_over(True)
 info.on_life_zero(on_life_zero)
 
-# The Maths side can't be done in blocks.
-# This is the pattern shooter for the enemy.
 def shootBullets(posX2: number, posY2: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number):
     if typeBullet == 0:
         # Circle shoot.
@@ -347,11 +323,6 @@ fireType = 0
 isAgro = False
 score = 0
 
-# Game Loop
-#
-# Block of instructions that must be ran every game tick / frame.
-#
-# Handle all the logic related to Collision, Movement and Controls.
 def on_forever():
     game.stats = True
     collision()
