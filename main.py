@@ -1,10 +1,7 @@
 @namespace
 class SpriteKind:
     EnemyProjectile = SpriteKind.create()
-
-@namespace
-class SpriteKind:
-    EnemyProjFlak = SpriteKind.create()
+    EnemyProjFlak = SpriteKind.create()   
 
 class msDelay():
     counter = None
@@ -86,7 +83,7 @@ def updatePlayer():
             screenFlash = False
 
 def updateEnemy():
-    global waypoint, enemyStage, enemyOne, fireType, enemyHealth, enemyNormalImage, intro, isAgro, score
+    global waypoint, enemyStage, enemyOne, fireType, enemyHealth, enemyNormalImage, intro, score
     info.set_score(enemyHealth)
     if not intro:
         if enemyStage == 0:#Stage 1
@@ -174,10 +171,9 @@ def updateEnemy():
             elif(enemyAnimDelay.passed(500)):
                 enemyOne.set_image(enemyNormalImage)
         else:
-            #Final stage is beaten send win screen.
-            info.set_score(score)
-            game.set_game_over_message(True, "GAMEOVER! YOU WIN!")
-            game.game_over(True)
+            ##TODO finish
+
+            return
 
     if waypoint != None:
         #If we have a waypoint we move towards it. This also applies animations to the enemy.
@@ -194,6 +190,7 @@ def updateEnemy():
                 enemyNormalImage = assets.image("""EnemyLeft""")
                 setImage = True
         # Y
+        isAgro = (enemyStage == 2)
         if enemyOne.y < waypoint[1]:
             enemyOne.y += 1
             if not setImage:
@@ -224,10 +221,14 @@ def updateEnemy():
         info.set_life(info.life() + 3)
         enemyStage += 1
         enemyHealth = 30
-        if not isAgro:
-            isAgro = True
-        else:
+        if enemyStage >= 3:
             sprites.destroy(enemyOne)
+
+def endGame():
+    #Final stage is beaten send win screen.
+    info.set_score(score)
+    game.set_game_over_message(True, "GAMEOVER! YOU WIN!")
+    game.game_over(True)
 
 def calcDist(posX: number, posY: number, posX1: number, posY1: number):
     xDiff = posX - posX1
@@ -259,6 +260,7 @@ def on_life_zero():
 info.on_life_zero(on_life_zero)
 
 def shootBullets(posX2: number, posY2: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number):
+    #TODO Create limits for the shoot types. and defaults
     if typeBullet == 0:
         # Circle shoot.
         angle2 = -180
@@ -320,8 +322,10 @@ enemyAnimDelay = msDelay()
 intro = True
 info.set_life(3)
 fireType = 0
-isAgro = False
+#isAgro = False
 score = 0
+
+#Update 2
 
 def on_forever():
     game.stats = True

@@ -1,8 +1,5 @@
 namespace SpriteKind {
     export const EnemyProjectile = SpriteKind.create()
-}
-
-namespace SpriteKind {
     export const EnemyProjFlak = SpriteKind.create()
 }
 
@@ -151,6 +148,7 @@ function updateEnemy() {
     let tPosY: number;
     let distToPlayer: number;
     let setImage: boolean;
+    let isAgro: any;
     
     info.setScore(enemyHealth)
     if (!intro) {
@@ -266,10 +264,8 @@ function updateEnemy() {
             }
             
         } else {
-            // Final stage is beaten send win screen.
-            info.setScore(score)
-            game.setGameOverMessage(true, "GAMEOVER! YOU WIN!")
-            game.gameOver(true)
+            // #TODO finish
+            return
         }
         
     }
@@ -295,6 +291,7 @@ function updateEnemy() {
         }
         
         //  Y
+        isAgro = enemyStage == 2
         if (enemyOne.y < waypoint[1]) {
             enemyOne.y += 1
             if (!setImage) {
@@ -340,14 +337,19 @@ function updateEnemy() {
         info.setLife(info.life() + 3)
         enemyStage += 1
         enemyHealth = 30
-        if (!isAgro) {
-            isAgro = true
-        } else {
+        if (enemyStage >= 3) {
             sprites.destroy(enemyOne)
         }
         
     }
     
+}
+
+function endGame() {
+    // Final stage is beaten send win screen.
+    info.setScore(score)
+    game.setGameOverMessage(true, "GAMEOVER! YOU WIN!")
+    game.gameOver(true)
 }
 
 function calcDist(posX: number, posY: number, posX1: number, posY1: number): number {
@@ -394,6 +396,7 @@ function shootBullets(posX2: number, posY2: number, speed: number, distance: num
     let velY: number;
     let enemyProjectile: Sprite;
     let angle: number;
+    // TODO Create limits for the shoot types. and defaults
     if (typeBullet == 0) {
         //  Circle shoot.
         angle2 = -180
@@ -462,8 +465,9 @@ let enemyAnimDelay = new msDelay()
 let intro = true
 info.setLife(3)
 let fireType = 0
-let isAgro = false
+// isAgro = False
 let score = 0
+// Update 2
 forever(function on_forever() {
     game.stats = true
     collision()

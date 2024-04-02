@@ -54,6 +54,11 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "EnemyFlak"
     },
+    "image12": {
+        "data": "hwQQABAAAAAAAAAAAAAAzAAAAAAAAMDMAAAAAAAAzMwAAAAAAADPzAAAAAAA4M/MAAAAAADs78wAAAAA7izs7szMz+8uLCzu3b0vL0QuLiIAAAAA7k4uIgAAAAAA7i8iAAAAAADgTyQAAAAAAAAuQgAAAAAAAO4iAAAAAAAA4O4AAAAAAAAA7g==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "Space Ship"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",
