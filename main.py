@@ -33,15 +33,31 @@ def collision():
                 screenFlashTimer.reset()
                 break
 
-    for value1 in sprites.all_of_kind(SpriteKind.projectile):
-        dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
-        if dist >= 10:
-            continue
-        if enemyOne.overlaps_with(value1):
-            value1.start_effect(effects.fire, 100)
-            sprites.destroy(value1)
-            enemyHealth += 0 - 1
-            score += 100
+    if enemyStage < 2:
+        for value1 in sprites.all_of_kind(SpriteKind.projectile):
+            dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
+            if dist >= 10:
+                continue
+            if enemyOne.overlaps_with(value1):
+                value1.start_effect(effects.fire, 100)
+                sprites.destroy(value1)
+                enemyHealth += 0 - 1
+                score += 100
+    else:
+        for value3 in sprites.all_of_kind(SpriteKind.projectile):
+            for enemy in enemyList:
+                dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
+                if dist >= 10:
+                    continue
+                if enemy.overlaps_with(value3):
+                    value3.start_effect(effects.fire, 100)
+                    sprites.destroy(value3)
+                    sprites.change_data_number_by(enemy, "health", -1)
+                    if sprites.read_data_number(enemy, "Health") <= 0:
+                        sprites.destroy(enemy)
+                        enemyList.remove_element(enemy)
+                    score += 100  
+
     for value2 in sprites.all_of_kind(SpriteKind.EnemyProjFlak):
         dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
         if dist >= 25:
@@ -171,8 +187,6 @@ def updateEnemy():
             elif(enemyAnimDelay.passed(500)):
                 enemyOne.set_image(enemyNormalImage)
         else:
-            ##TODO finish
-
             return
 
     if waypoint != None:
@@ -297,6 +311,74 @@ def shootBullets(posX2: number, posY2: number, speed: number, distance: number, 
         velY = Math.cos(angle) * speed
         enemyProjectile.set_velocity(velX, velY)
 
+def updateEnemyGroup():
+    for enemy in enemyList:
+        print(enemy)
+        waypointPos = (
+            sprites.read_data_number(enemy, "waypointX"),
+            sprites.read_data_number(enemy, "waypointY")
+        )
+        waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
+        
+        if Math.percent_chance(0.00001):
+            enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
+            enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
+            enemyProjectile.set_position(enemy.x, enemy.y)
+            angle = ( calcAngle(enemy.x - (enemy.width / 2), enemy.y - (enemy.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
+            angle += randint(-0.5, 0.5)
+            velX = Math.sin(angle) * 200
+            velY = Math.cos(angle) * 200
+            enemyProjectile.set_velocity(velX, velY)       
+        
+        if waypointDist <= 1:
+            if sprites.read_data_boolean(enemy, "anim"):
+                sprites.set_data_boolean(enemy, "anim", False)
+
+            tPosX = Math.round(Math.random() * 100)
+            tPosY = Math.round(Math.random() * 100)
+            # Min check
+            tPosX = min(tPosX, scene.screen_width())
+            tPosY = min(tPosY, scene.screen_height())
+            # Max check
+            tPosX = max(tPosX, 0)
+            tPosY = max(tPosY, 0)
+            distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
+            if distToPlayer >= 35:
+                sprites.set_data_number(enemy, "waypointX", tPosX)
+                sprites.set_data_number(enemy, "waypointY", tPosY)
+
+        else:
+            if waypointPos[0] < enemy.x:
+                enemy.x -= 1
+            elif waypointPos[0] > enemy.x:
+                enemy.x += 1
+
+            if waypointPos[1] < enemy.y:
+                enemy.y -= 1
+            elif waypointPos[1] > enemy.y:
+                enemy.y += 1
+
+def spawnEnemy():
+    tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.enemy)
+
+    #Position
+    randomX = randint(20, 140)
+    randomY = randint(0, 20)
+
+    tempEnemy.set_position(randomX, -20)
+
+    #Data
+    sprites.set_data_number(tempEnemy, "waypointX", randomX)
+    sprites.set_data_number(tempEnemy, "waypointY", randomY)
+    sprites.set_data_number(tempEnemy, "health", 30)
+
+    #Spawn animation
+    sprites.set_data_boolean(tempEnemy, "anim", True)
+
+    #Push to list
+    enemyList.push(tempEnemy)
+
+enemyList: List[Sprite] = []
 moveSpeed = 0
 screenFlash = False
 playerOne: Sprite = None
@@ -327,9 +409,17 @@ score = 0
 
 #Update 2
 
+spawnEnemy()
+spawnEnemy()
+
+enemyStage = 3
+
 def on_forever():
     game.stats = True
     collision()
     updatePlayer()
-    updateEnemy()
+    if enemyStage < 2:
+        updateEnemy()
+    else:
+        updateEnemyGroup()
 forever(on_forever)

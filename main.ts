@@ -62,20 +62,45 @@ function collision() {
         }
     }
     
-    for (let value1 of sprites.allOfKind(SpriteKind.Projectile)) {
-        dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
-        if (dist >= 10) {
-            continue
+    if (enemyStage < 2) {
+        for (let value1 of sprites.allOfKind(SpriteKind.Projectile)) {
+            dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
+            if (dist >= 10) {
+                continue
+            }
+            
+            if (enemyOne.overlapsWith(value1)) {
+                value1.startEffect(effects.fire, 100)
+                sprites.destroy(value1)
+                enemyHealth += 0 - 1
+                score += 100
+            }
+            
         }
-        
-        if (enemyOne.overlapsWith(value1)) {
-            value1.startEffect(effects.fire, 100)
-            sprites.destroy(value1)
-            enemyHealth += 0 - 1
-            score += 100
+    } else {
+        for (let value3 of sprites.allOfKind(SpriteKind.Projectile)) {
+            for (let enemy of enemyList) {
+                dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
+                if (dist >= 10) {
+                    continue
+                }
+                
+                if (enemy.overlapsWith(value3)) {
+                    value3.startEffect(effects.fire, 100)
+                    sprites.destroy(value3)
+                    sprites.changeDataNumberBy(enemy, "health", -1)
+                    if (sprites.readDataNumber(enemy, "Health") <= 0) {
+                        sprites.destroy(enemy)
+                        enemyList.removeElement(enemy)
+                    }
+                    
+                    score += 100
+                }
+                
+            }
         }
-        
     }
+    
     for (let value2 of sprites.allOfKind(SpriteKind.EnemyProjFlak)) {
         dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
         if (dist >= 25) {
@@ -264,7 +289,6 @@ function updateEnemy() {
             }
             
         } else {
-            // #TODO finish
             return
         }
         
@@ -358,13 +382,13 @@ function calcDist(posX: number, posY: number, posX1: number, posY1: number): num
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
 }
 
-function calcAngle(posX: number, posY: number, posX1: number, posY1: number) {
+function calcAngle(posX: number, posY: number, posX1: number, posY1: number): number {
     let xDiff = posX - posX1
     let yDiff = posY - posY1
     return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
 }
 
-function wrapDegrees(degrees: number) {
+function wrapDegrees(degrees: number): number {
     let d = degrees % 360.0
     if (d >= 180.0) {
         d -= 360.0
@@ -440,6 +464,85 @@ function shootBullets(posX2: number, posY2: number, speed: number, distance: num
     
 }
 
+function updateEnemyGroup() {
+    let waypointPos: number[];
+    let waypointDist: number;
+    let enemyProjectile: Sprite;
+    let angle: number;
+    let velX: number;
+    let velY: number;
+    let tPosX: number;
+    let tPosY: number;
+    let distToPlayer: number;
+    for (let enemy of enemyList) {
+        console.log(enemy)
+        waypointPos = [sprites.readDataNumber(enemy, "waypointX"), sprites.readDataNumber(enemy, "waypointY")]
+        waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
+        if (Math.percentChance(0.00001)) {
+            enemyProjectile = sprites.create(assets.image`EnemyFlak`, SpriteKind.EnemyProjFlak)
+            enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
+            enemyProjectile.setPosition(enemy.x, enemy.y)
+            angle = calcAngle(enemy.x - enemy.width / 2, enemy.y - enemy.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
+            angle += randint(-0.5, 0.5)
+            velX = Math.sin(angle) * 200
+            velY = Math.cos(angle) * 200
+            enemyProjectile.setVelocity(velX, velY)
+        }
+        
+        if (waypointDist <= 1) {
+            if (sprites.readDataBoolean(enemy, "anim")) {
+                sprites.setDataBoolean(enemy, "anim", false)
+            }
+            
+            tPosX = Math.round(Math.random() * 100)
+            tPosY = Math.round(Math.random() * 100)
+            //  Min check
+            tPosX = Math.min(tPosX, scene.screenWidth())
+            tPosY = Math.min(tPosY, scene.screenHeight())
+            //  Max check
+            tPosX = Math.max(tPosX, 0)
+            tPosY = Math.max(tPosY, 0)
+            distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
+            if (distToPlayer >= 35) {
+                sprites.setDataNumber(enemy, "waypointX", tPosX)
+                sprites.setDataNumber(enemy, "waypointY", tPosY)
+            }
+            
+        } else {
+            if (waypointPos[0] < enemy.x) {
+                enemy.x -= 1
+            } else if (waypointPos[0] > enemy.x) {
+                enemy.x += 1
+            }
+            
+            if (waypointPos[1] < enemy.y) {
+                enemy.y -= 1
+            } else if (waypointPos[1] > enemy.y) {
+                enemy.y += 1
+            }
+            
+        }
+        
+    }
+}
+
+function spawnEnemy() {
+    let tempEnemy = sprites.create(assets.image`Space Ship`, SpriteKind.Enemy)
+    // Position
+    let randomX = randint(20, 140)
+    let randomY = randint(0, 20)
+    tempEnemy.setPosition(randomX, -20)
+    // Data
+    sprites.setDataNumber(tempEnemy, "waypointX", randomX)
+    sprites.setDataNumber(tempEnemy, "waypointY", randomY)
+    sprites.setDataNumber(tempEnemy, "health", 30)
+    // Spawn animation
+    sprites.setDataBoolean(tempEnemy, "anim", true)
+    // Push to list
+    enemyList.push(tempEnemy)
+}
+
+let enemyList : Sprite[] = []
 let moveSpeed = 0
 let screenFlash = false
 let playerOne : Sprite = null
@@ -468,9 +571,17 @@ let fireType = 0
 // isAgro = False
 let score = 0
 // Update 2
+spawnEnemy()
+spawnEnemy()
+enemyStage = 3
 forever(function on_forever() {
     game.stats = true
     collision()
     updatePlayer()
-    updateEnemy()
+    if (enemyStage < 2) {
+        updateEnemy()
+    } else {
+        updateEnemyGroup()
+    }
+    
 })
