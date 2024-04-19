@@ -467,58 +467,93 @@ function shootBullets(posX2: number, posY2: number, speed: number, distance: num
 function updateEnemyGroup() {
     let waypointPos: number[];
     let waypointDist: number;
+    let playerDist: number;
+    let enemyShootDelay: number;
+    let enemyMoveDelay: number;
     let enemyProjectile: Sprite;
     let angle: number;
     let velX: number;
     let velY: number;
+    let goodWaypoint: boolean;
+    let distToPlayer: number;
+    let iterLimit: number;
     let tPosX: number;
     let tPosY: number;
-    let distToPlayer: number;
     for (let enemy of enemyList) {
-        console.log(enemy)
         waypointPos = [sprites.readDataNumber(enemy, "waypointX"), sprites.readDataNumber(enemy, "waypointY")]
         waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
-        if (Math.percentChance(0.00001)) {
+        playerDist = calcDist(enemy.x, enemy.y, playerOne.x, playerOne.y)
+        enemyShootDelay = sprites.readDataNumber(enemy, "shootDelay")
+        enemyMoveDelay = sprites.readDataNumber(enemy, "moveDelay")
+        if (sprites.readDataNumber(enemy, "health") <= 0) {
+            sprites.destroy(enemy)
+            return
+        }
+        
+        if (enemyShootDelay <= 0 && playerDist <= 80 && !(playerDist <= 30)) {
             enemyProjectile = sprites.create(assets.image`EnemyFlak`, SpriteKind.EnemyProjFlak)
             enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
             enemyProjectile.setPosition(enemy.x, enemy.y)
             angle = calcAngle(enemy.x - enemy.width / 2, enemy.y - enemy.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
             angle += randint(-0.5, 0.5)
-            velX = Math.sin(angle) * 200
-            velY = Math.cos(angle) * 200
+            velX = Math.sin(angle) * 125
+            velY = Math.cos(angle) * 125
             enemyProjectile.setVelocity(velX, velY)
+            sprites.setDataNumber(enemy, "shootDelay", 55 + randint(20, 25))
+        } else {
+            sprites.setDataNumber(enemy, "shootDelay", enemyShootDelay - 1)
         }
         
-        if (waypointDist <= 1) {
-            if (sprites.readDataBoolean(enemy, "anim")) {
-                sprites.setDataBoolean(enemy, "anim", false)
-            }
-            
-            tPosX = Math.round(Math.random() * 100)
-            tPosY = Math.round(Math.random() * 100)
-            //  Min check
-            tPosX = Math.min(tPosX, scene.screenWidth())
-            tPosY = Math.min(tPosY, scene.screenHeight())
-            //  Max check
-            tPosX = Math.max(tPosX, 0)
-            tPosY = Math.max(tPosY, 0)
-            distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
-            if (distToPlayer >= 35) {
-                sprites.setDataNumber(enemy, "waypointX", tPosX)
-                sprites.setDataNumber(enemy, "waypointY", tPosY)
+        if (waypointDist <= 2) {
+            if (enemyMoveDelay <= 0 || sprites.readDataNumber(enemy, "anim")) {
+                sprites.setDataNumber(enemy, "moveDelay", 50)
+                if (sprites.readDataBoolean(enemy, "anim")) {
+                    sprites.setDataBoolean(enemy, "anim", false)
+                }
+                
+                goodWaypoint = false
+                distToPlayer = 0
+                iterLimit = 200
+                while (goodWaypoint == false) {
+                    iterLimit = iterLimit - 1
+                    if (iterLimit == 0) {
+                        break
+                    }
+                    
+                    tPosX = Math.round(Math.random() * 100)
+                    tPosY = Math.round(Math.random() * 100)
+                    //  Min check
+                    tPosX = Math.min(tPosX, scene.screenWidth())
+                    tPosY = Math.min(tPosY, scene.screenHeight())
+                    //  Max check
+                    tPosX = Math.max(tPosX, 0)
+                    tPosY = Math.max(tPosY, 0)
+                    distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
+                    if (playerDist >= 70) {
+                        goodWaypoint = true
+                    }
+                    
+                }
+                if (goodWaypoint) {
+                    sprites.setDataNumber(enemy, "waypointX", tPosX)
+                    sprites.setDataNumber(enemy, "waypointY", tPosY)
+                }
+                
+            } else {
+                sprites.setDataNumber(enemy, "moveDelay", enemyMoveDelay - 1)
             }
             
         } else {
             if (waypointPos[0] < enemy.x) {
-                enemy.x -= 1
+                enemy.x -= 2
             } else if (waypointPos[0] > enemy.x) {
-                enemy.x += 1
+                enemy.x += 2
             }
             
             if (waypointPos[1] < enemy.y) {
-                enemy.y -= 1
+                enemy.y -= 2
             } else if (waypointPos[1] > enemy.y) {
-                enemy.y += 1
+                enemy.y += 2
             }
             
         }
@@ -535,7 +570,9 @@ function spawnEnemy() {
     // Data
     sprites.setDataNumber(tempEnemy, "waypointX", randomX)
     sprites.setDataNumber(tempEnemy, "waypointY", randomY)
-    sprites.setDataNumber(tempEnemy, "health", 30)
+    sprites.setDataNumber(tempEnemy, "health", 10)
+    sprites.setDataNumber(tempEnemy, "shootDelay", 55)
+    sprites.setDataNumber(tempEnemy, "moveDelay", 50)
     // Spawn animation
     sprites.setDataBoolean(tempEnemy, "anim", true)
     // Push to list

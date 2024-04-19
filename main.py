@@ -313,50 +313,74 @@ def shootBullets(posX2: number, posY2: number, speed: number, distance: number, 
 
 def updateEnemyGroup():
     for enemy in enemyList:
-        print(enemy)
         waypointPos = (
             sprites.read_data_number(enemy, "waypointX"),
             sprites.read_data_number(enemy, "waypointY")
         )
         waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
-        
-        if Math.percent_chance(0.00001):
+        playerDist = calcDist(enemy.x, enemy.y, playerOne.x, playerOne.y)
+        enemyShootDelay = sprites.read_data_number(enemy, "shootDelay")
+        enemyMoveDelay = sprites.read_data_number(enemy, "moveDelay")
+    
+        if sprites.read_data_number(enemy, "health") <= 0:
+            sprites.destroy(enemy)
+            return
+
+        if enemyShootDelay <= 0 and playerDist <= 80 and not playerDist <= 30:
             enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
             enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
             enemyProjectile.set_position(enemy.x, enemy.y)
             angle = ( calcAngle(enemy.x - (enemy.width / 2), enemy.y - (enemy.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
             angle += randint(-0.5, 0.5)
-            velX = Math.sin(angle) * 200
-            velY = Math.cos(angle) * 200
-            enemyProjectile.set_velocity(velX, velY)       
-        
-        if waypointDist <= 1:
-            if sprites.read_data_boolean(enemy, "anim"):
-                sprites.set_data_boolean(enemy, "anim", False)
+            velX = Math.sin(angle) * 125
+            velY = Math.cos(angle) * 125
+            enemyProjectile.set_velocity(velX, velY)    
+            sprites.set_data_number(enemy, "shootDelay", 55 + randint(20, 25))
+        else:
+            sprites.set_data_number(enemy, "shootDelay", enemyShootDelay - 1)
 
-            tPosX = Math.round(Math.random() * 100)
-            tPosY = Math.round(Math.random() * 100)
-            # Min check
-            tPosX = min(tPosX, scene.screen_width())
-            tPosY = min(tPosY, scene.screen_height())
-            # Max check
-            tPosX = max(tPosX, 0)
-            tPosY = max(tPosY, 0)
-            distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
-            if distToPlayer >= 35:
-                sprites.set_data_number(enemy, "waypointX", tPosX)
-                sprites.set_data_number(enemy, "waypointY", tPosY)
+        if waypointDist <= 2:
+            if enemyMoveDelay <= 0 or sprites.read_data_number(enemy, "anim"):
+                sprites.set_data_number(enemy, "moveDelay", 50)
+                if sprites.read_data_boolean(enemy, "anim"):
+                    sprites.set_data_boolean(enemy, "anim", False)
 
+                goodWaypoint = False
+
+                distToPlayer = 0
+                iterLimit = 200
+                while goodWaypoint == False:
+                    iterLimit = iterLimit - 1
+                    if iterLimit == 0:
+                        break
+                    tPosX = Math.round(Math.random() * 100)
+                    tPosY = Math.round(Math.random() * 100)
+                    # Min check
+                    tPosX = min(tPosX, scene.screen_width())
+                    tPosY = min(tPosY, scene.screen_height())
+                    # Max check
+                    tPosX = max(tPosX, 0)
+                    tPosY = max(tPosY, 0)
+                    distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
+                    if  playerDist >= 70:
+                        goodWaypoint = True
+
+                if goodWaypoint:
+                    sprites.set_data_number(enemy, "waypointX", tPosX)
+                    sprites.set_data_number(enemy, "waypointY", tPosY)
+            else:
+                sprites.set_data_number(enemy, "moveDelay", enemyMoveDelay - 1)
         else:
             if waypointPos[0] < enemy.x:
-                enemy.x -= 1
+                enemy.x -= 2
             elif waypointPos[0] > enemy.x:
-                enemy.x += 1
+                enemy.x += 2
 
             if waypointPos[1] < enemy.y:
-                enemy.y -= 1
+                enemy.y -= 2
             elif waypointPos[1] > enemy.y:
-                enemy.y += 1
+                enemy.y += 2
+        
 
 def spawnEnemy():
     tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.enemy)
@@ -370,7 +394,9 @@ def spawnEnemy():
     #Data
     sprites.set_data_number(tempEnemy, "waypointX", randomX)
     sprites.set_data_number(tempEnemy, "waypointY", randomY)
-    sprites.set_data_number(tempEnemy, "health", 30)
+    sprites.set_data_number(tempEnemy, "health", 10)
+    sprites.set_data_number(tempEnemy, "shootDelay", 55)
+    sprites.set_data_number(tempEnemy, "moveDelay", 50)
 
     #Spawn animation
     sprites.set_data_boolean(tempEnemy, "anim", True)
