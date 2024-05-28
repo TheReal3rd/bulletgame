@@ -75,14 +75,24 @@ def updatePlayer():
     else:
         moveSpeed = 2
 
+    noMove = True
     if controller.down.is_pressed():
         playerOne.y += moveSpeed
-    if controller.up.is_pressed():
+        noMove = False
+    elif controller.up.is_pressed():
         playerOne.y += moveSpeed * -1
+        noMove = False
     if controller.left.is_pressed():
         playerOne.x += moveSpeed * -1
-    if controller.right.is_pressed():
+        scroller.scroll_background_with_speed(-10, 10)
+        noMove = False
+    elif controller.right.is_pressed():
         playerOne.x += moveSpeed
+        scroller.scroll_background_with_speed(10, 10)
+        noMove = False
+
+    if noMove:
+        scroller.scroll_background_with_speed(0, 10)
 
     if controller.A.is_pressed():
         delay = 500
@@ -93,9 +103,10 @@ def updatePlayer():
             fireDelay.reset()
 
     if screenFlash:
-        scene.set_background_color(2)
+        scene.set_background_image(assets.image("""BackgroundLayer2"""))
+        scene.camera_shake(2, 400)
         if screenFlashTimer.passed(200):
-            scene.set_background_color(0)
+            scene.set_background_image(assets.image("""BackgroundLayer1"""))
             screenFlash = False
 
 def updateEnemy():
@@ -404,6 +415,10 @@ def spawnEnemy():
     #Push to list
     enemyList.push(tempEnemy)
 
+def startScrollingBG():
+    scene.set_background_image(assets.image("""BackgroundLayer1"""))
+    scroller.scroll_background_with_speed(0, 10)
+
 enemyList: List[Sprite] = []
 moveSpeed = 0
 screenFlash = False
@@ -435,11 +450,12 @@ score = 0
 
 #Update 2
 
-spawnEnemy()
-spawnEnemy()
+#spawnEnemy()
+#spawnEnemy()
 
-enemyStage = 3
+#enemyStage = 3
 
+startScrollingBG()
 def on_forever():
     game.stats = True
     collision()

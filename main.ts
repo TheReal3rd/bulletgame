@@ -125,20 +125,27 @@ function updatePlayer() {
         moveSpeed = 2
     }
     
+    let noMove = true
     if (controller.down.isPressed()) {
         playerOne.y += moveSpeed
-    }
-    
-    if (controller.up.isPressed()) {
+        noMove = false
+    } else if (controller.up.isPressed()) {
         playerOne.y += moveSpeed * -1
+        noMove = false
     }
     
     if (controller.left.isPressed()) {
         playerOne.x += moveSpeed * -1
+        scroller.scrollBackgroundWithSpeed(-10, 10)
+        noMove = false
+    } else if (controller.right.isPressed()) {
+        playerOne.x += moveSpeed
+        scroller.scrollBackgroundWithSpeed(10, 10)
+        noMove = false
     }
     
-    if (controller.right.isPressed()) {
-        playerOne.x += moveSpeed
+    if (noMove) {
+        scroller.scrollBackgroundWithSpeed(0, 10)
     }
     
     if (controller.A.isPressed()) {
@@ -155,9 +162,10 @@ function updatePlayer() {
     }
     
     if (screenFlash) {
-        scene.setBackgroundColor(2)
+        scene.setBackgroundImage(assets.image`BackgroundLayer2`)
+        scene.cameraShake(2, 400)
         if (screenFlashTimer.passed(200)) {
-            scene.setBackgroundColor(0)
+            scene.setBackgroundImage(assets.image`BackgroundLayer1`)
             screenFlash = false
         }
         
@@ -579,6 +587,11 @@ function spawnEnemy() {
     enemyList.push(tempEnemy)
 }
 
+function startScrollingBG() {
+    scene.setBackgroundImage(assets.image`BackgroundLayer1`)
+    scroller.scrollBackgroundWithSpeed(0, 10)
+}
+
 let enemyList : Sprite[] = []
 let moveSpeed = 0
 let screenFlash = false
@@ -608,9 +621,10 @@ let fireType = 0
 // isAgro = False
 let score = 0
 // Update 2
-spawnEnemy()
-spawnEnemy()
-enemyStage = 3
+// spawnEnemy()
+// spawnEnemy()
+// enemyStage = 3
+startScrollingBG()
 forever(function on_forever() {
     game.stats = true
     collision()
