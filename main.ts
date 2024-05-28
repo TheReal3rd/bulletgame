@@ -1,6 +1,7 @@
 namespace SpriteKind {
     export const EnemyProjectile = SpriteKind.create()
     export const EnemyProjFlak = SpriteKind.create()
+    export const EnemyProjLaser = SpriteKind.create()
 }
 
 class msDelay {
@@ -42,6 +43,7 @@ msDelay.__initmsDelay()
 
 function collision() {
     let dist: number;
+    let lifeTimer: number;
     
     if (!screenFlash) {
         for (let value of sprites.allOfKind(SpriteKind.EnemyProjectile)) {
@@ -112,6 +114,27 @@ function collision() {
         }
         
     }
+    for (let laserSeg of sprites.allOfKind(SpriteKind.EnemyProjLaser)) {
+        lifeTimer = sprites.readDataNumber(laserSeg, "lifeTimer")
+        sprites.setDataNumber(laserSeg, "lifeTimer", lifeTimer + 1)
+        if (lifeTimer >= 40) {
+            sprites.setDataBoolean(laserSeg, "charged", true)
+            laserSeg.setImage(assets.image`LaserSegment`)
+            if (lifeTimer >= 60) {
+                sprites.destroy(laserSeg)
+            }
+            
+            if (!screenFlash && playerOne.overlapsWith(laserSeg)) {
+                laserSeg.startEffect(effects.fire, 100)
+                sprites.destroy(laserSeg)
+                info.changeLifeBy(-1)
+                screenFlash = true
+                screenFlashTimer.reset()
+            }
+            
+        }
+        
+    }
 }
 
 function updatePlayer() {
@@ -136,16 +159,16 @@ function updatePlayer() {
     
     if (controller.left.isPressed()) {
         playerOne.x += moveSpeed * -1
-        scroller.scrollBackgroundWithSpeed(-10, 10)
+        scroller.scrollBackgroundWithSpeed(-10, bgVSpeed)
         noMove = false
     } else if (controller.right.isPressed()) {
         playerOne.x += moveSpeed
-        scroller.scrollBackgroundWithSpeed(10, 10)
+        scroller.scrollBackgroundWithSpeed(10, bgVSpeed)
         noMove = false
     }
     
     if (noMove) {
-        scroller.scrollBackgroundWithSpeed(0, 10)
+        scroller.scrollBackgroundWithSpeed(0, bgVSpeed)
     }
     
     if (controller.A.isPressed()) {
@@ -396,6 +419,7 @@ function calcAngle(posX: number, posY: number, posX1: number, posY1: number): nu
     return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
 }
 
+//  -180
 function wrapDegrees(degrees: number): number {
     let d = degrees % 360.0
     if (d >= 180.0) {
@@ -420,7 +444,7 @@ info.onLifeZero(function on_life_zero() {
     game.setGameOverMessage(true, "GAME OVER! YOU LOSE!")
     game.gameOver(true)
 })
-function shootBullets(posX2: number, posY2: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number) {
+function shootBullets(posX: number, posY: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number) {
     let angle2: number;
     let oPosX: number;
     let oPosY: number;
@@ -428,13 +452,19 @@ function shootBullets(posX2: number, posY2: number, speed: number, distance: num
     let velY: number;
     let enemyProjectile: Sprite;
     let angle: number;
+    let currentPosX: number;
+    let currentPosY: number;
+    let step: number;
+    let sin: number;
+    let cos: number;
+    let toPos: any[];
     // TODO Create limits for the shoot types. and defaults
     if (typeBullet == 0) {
         //  Circle shoot.
         angle2 = -180
         while (angle2 <= 180) {
-            oPosX = posX2 + distance * Math.sin(Math.PI * angle2 / 180)
-            oPosY = posY2 + distance * (0 - Math.cos(Math.PI * angle2 / 180))
+            oPosX = posX + distance * Math.sin(Math.PI * angle2 / 180)
+            oPosY = posY + distance * (0 - Math.cos(Math.PI * angle2 / 180))
             velX = Math.sin(Math.PI * (angle2 + angleOffset) / 180) * speed
             velY = (0 - Math.cos(Math.PI * (angle2 + angleOffset) / 180)) * speed
             enemyProjectile = sprites.create(assets.image`EnemyBullet `, SpriteKind.EnemyProjectile)
@@ -444,15 +474,15 @@ function shootBullets(posX2: number, posY2: number, speed: number, distance: num
             angle2 += numBullets * 10
         }
     } else if (typeBullet == 1) {
-        //  Laser Shoot
+        //  Laser Line Shoot
         angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
         for (let x = -numBullets; x < numBullets; x++) {
             enemyProjectile = sprites.create(assets.image`LaserPixel`, SpriteKind.EnemyProjectile)
             enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
             if (!(angle <= 1.8 && angle >= 0.8 || angle <= -1.8 && angle >= -0.8)) {
-                enemyProjectile.setPosition(posX2 + x * enemyProjectile.width, posY2)
+                enemyProjectile.setPosition(posX + x * enemyProjectile.width, posY)
             } else {
-                enemyProjectile.setPosition(posX2, posY2 + x * enemyProjectile.height)
+                enemyProjectile.setPosition(posX, posY + x * enemyProjectile.height)
             }
             
             velX = Math.sin(angle) * speed
@@ -463,13 +493,40 @@ function shootBullets(posX2: number, posY2: number, speed: number, distance: num
         // Flak Shot Will explode when near a player of a cirle shot.
         enemyProjectile = sprites.create(assets.image`EnemyFlak`, SpriteKind.EnemyProjFlak)
         enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
-        enemyProjectile.setPosition(posX2, posY2)
+        enemyProjectile.setPosition(posX, posY)
         angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
         velX = Math.sin(angle) * speed
         velY = Math.cos(angle) * speed
         enemyProjectile.setVelocity(velX, velY)
+    } else if (typeBullet == 3) {
+        // Direct laser shot towards the a target.
+        currentPosX = posX
+        currentPosY = posY
+        step = 0
+        angle = calcAngle(posX, posY, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2)
+        sin = Math.sin(toRadians(angle))
+        cos = Math.cos(toRadians(angle))
+        toPos = [currentPosX + distance * cos, currentPosY + distance * sin]
+        while (step != distance) {
+            if (currentPosX <= 0 || currentPosX >= 160 || currentPosY <= 0 || currentPosY >= 120) {
+                break
+            }
+            
+            enemyProjectile = sprites.create(assets.image`LaserSegmentUncharged`, SpriteKind.EnemyProjLaser)
+            enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
+            enemyProjectile.setPosition(currentPosX, currentPosY)
+            sprites.setDataBoolean(enemyProjectile, "charged", false)
+            sprites.setDataNumber(enemyProjectile, "lifeTimer", 0)
+            currentPosX += enemyProjectile.width * sin
+            currentPosY += enemyProjectile.height * cos
+            step += 1
+        }
     }
     
+}
+
+function toRadians(degrees: number): number {
+    return degrees * Math.PI / 180
 }
 
 function updateEnemyGroup() {
@@ -478,10 +535,6 @@ function updateEnemyGroup() {
     let playerDist: number;
     let enemyShootDelay: number;
     let enemyMoveDelay: number;
-    let enemyProjectile: Sprite;
-    let angle: number;
-    let velX: number;
-    let velY: number;
     let goodWaypoint: boolean;
     let distToPlayer: number;
     let iterLimit: number;
@@ -498,16 +551,17 @@ function updateEnemyGroup() {
             return
         }
         
-        if (enemyShootDelay <= 0 && playerDist <= 80 && !(playerDist <= 30)) {
-            enemyProjectile = sprites.create(assets.image`EnemyFlak`, SpriteKind.EnemyProjFlak)
-            enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
-            enemyProjectile.setPosition(enemy.x, enemy.y)
-            angle = calcAngle(enemy.x - enemy.width / 2, enemy.y - enemy.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
-            angle += randint(-0.5, 0.5)
-            velX = Math.sin(angle) * 125
-            velY = Math.cos(angle) * 125
-            enemyProjectile.setVelocity(velX, velY)
-            sprites.setDataNumber(enemy, "shootDelay", 55 + randint(20, 25))
+        if (enemyShootDelay <= 0 && playerDist <= 90 && !(playerDist <= 40)) {
+            // enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
+            // enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
+            // enemyProjectile.set_position(enemy.x, enemy.y)
+            // angle = ( calcAngle(enemy.x - (enemy.width / 2), enemy.y - (enemy.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
+            // angle += randint(-0.5, 0.5)
+            // velX = Math.sin(angle) * 125
+            // velY = Math.cos(angle) * 125
+            // enemyProjectile.set_velocity(velX, velY)    
+            shootBullets(enemy.x, enemy.y, 0, 100, 0, 3, 0)
+            sprites.setDataNumber(enemy, "shootDelay", 45 + randint(10, 20))
         } else {
             sprites.setDataNumber(enemy, "shootDelay", enemyShootDelay - 1)
         }
@@ -588,8 +642,9 @@ function spawnEnemy() {
 }
 
 function startScrollingBG() {
+    
     scene.setBackgroundImage(assets.image`BackgroundLayer1`)
-    scroller.scrollBackgroundWithSpeed(0, 10)
+    scroller.scrollBackgroundWithSpeed(0, bgVSpeed)
 }
 
 let enemyList : Sprite[] = []
@@ -620,10 +675,11 @@ info.setLife(3)
 let fireType = 0
 // isAgro = False
 let score = 0
+let bgVSpeed = 50
 // Update 2
-// spawnEnemy()
-// spawnEnemy()
-// enemyStage = 3
+spawnEnemy()
+spawnEnemy()
+enemyStage = 4
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true

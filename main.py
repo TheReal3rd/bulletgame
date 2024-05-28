@@ -2,6 +2,7 @@
 class SpriteKind:
     EnemyProjectile = SpriteKind.create()
     EnemyProjFlak = SpriteKind.create()   
+    EnemyProjLaser = SpriteKind.create()
 
 class msDelay():
     counter = None
@@ -67,8 +68,27 @@ def collision():
             sprites.destroy(value2)
             shootBullets(value2.x, value2.y, 15, 5, 0, 0, 6)
 
+    for laserSeg in sprites.all_of_kind(SpriteKind.EnemyProjLaser):
+        lifeTimer = sprites.read_data_number(laserSeg, "lifeTimer")
+        sprites.set_data_number(laserSeg, "lifeTimer", lifeTimer + 1)
+
+        if lifeTimer >= 40:
+            sprites.set_data_boolean(laserSeg, "charged", True)
+            laserSeg.set_image(assets.image("""LaserSegment"""))
+            if lifeTimer >= 60:
+                sprites.destroy(laserSeg)
+
+            if not screenFlash and playerOne.overlaps_with(laserSeg):
+                laserSeg.start_effect(effects.fire, 100)
+                sprites.destroy(laserSeg)
+                info.change_life_by(-1)
+                screenFlash = True
+                screenFlashTimer.reset()
+        
+
+
 def updatePlayer():
-    global moveSpeed, fireType, fireDelay, screenFlash, screenFlashTimer
+    global moveSpeed, fireType, fireDelay, screenFlash, screenFlashTimer, bgVSpeed
     isBPressed = controller.B.is_pressed()
     if isBPressed:
         moveSpeed = 0.5
@@ -84,15 +104,15 @@ def updatePlayer():
         noMove = False
     if controller.left.is_pressed():
         playerOne.x += moveSpeed * -1
-        scroller.scroll_background_with_speed(-10, 10)
+        scroller.scroll_background_with_speed(-10, bgVSpeed)
         noMove = False
     elif controller.right.is_pressed():
         playerOne.x += moveSpeed
-        scroller.scroll_background_with_speed(10, 10)
+        scroller.scroll_background_with_speed(10, bgVSpeed)
         noMove = False
 
     if noMove:
-        scroller.scroll_background_with_speed(0, 10)
+        scroller.scroll_background_with_speed(0, bgVSpeed)
 
     if controller.A.is_pressed():
         delay = 500
@@ -263,7 +283,7 @@ def calcDist(posX: number, posY: number, posX1: number, posY1: number):
 def calcAngle(posX: number, posY: number, posX1: number, posY1: number):
     xDiff = posX - posX1
     yDiff = posY - posY1
-    return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180)
+    return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180) # -180
 
 def wrapDegrees(degrees):
     d = degrees % 360.0;
@@ -284,14 +304,14 @@ def on_life_zero():
     game.game_over(True)
 info.on_life_zero(on_life_zero)
 
-def shootBullets(posX2: number, posY2: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number):
+def shootBullets(posX: number, posY: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number):
     #TODO Create limits for the shoot types. and defaults
     if typeBullet == 0:
         # Circle shoot.
         angle2 = -180
         while angle2 <= 180:
-            oPosX = posX2 + distance * Math.sin(Math.PI * angle2 / 180)
-            oPosY = posY2 + distance * (0 - Math.cos(Math.PI * angle2 / 180))
+            oPosX = posX + distance * Math.sin(Math.PI * angle2 / 180)
+            oPosY = posY + distance * (0 - Math.cos(Math.PI * angle2 / 180))
             velX = Math.sin(Math.PI * (angle2 + angleOffset) / 180) * speed
             velY = (0 - Math.cos(Math.PI * (angle2 + angleOffset) / 180)) * speed
             enemyProjectile = sprites.create(assets.image("""EnemyBullet """),SpriteKind.EnemyProjectile)
@@ -300,15 +320,15 @@ def shootBullets(posX2: number, posY2: number, speed: number, distance: number, 
             enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
             angle2 += numBullets * 10
     elif typeBullet == 1:
-        # Laser Shoot
+        # Laser Line Shoot
         angle = ( calcAngle(enemyOne.x - (enemyOne.width / 2), enemyOne.y - (enemyOne.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
         for x in range(-numBullets, numBullets):
             enemyProjectile = sprites.create(assets.image("""LaserPixel"""),SpriteKind.EnemyProjectile)
             enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
             if not (angle <= 1.8 and angle >= 0.8  or angle <= -1.8 and angle >= -0.8 ):
-                enemyProjectile.set_position(posX2 + (x * enemyProjectile.width), posY2)
+                enemyProjectile.set_position(posX + (x * enemyProjectile.width), posY)
             else:
-                enemyProjectile.set_position(posX2, posY2 + (x * enemyProjectile.height))
+                enemyProjectile.set_position(posX, posY + (x * enemyProjectile.height))
             velX = Math.sin(angle) * speed
             velY = Math.cos(angle) * speed
             enemyProjectile.set_velocity(velX, velY)
@@ -316,11 +336,36 @@ def shootBullets(posX2: number, posY2: number, speed: number, distance: number, 
         #Flak Shot Will explode when near a player of a cirle shot.
         enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
         enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
-        enemyProjectile.set_position(posX2, posY2)
+        enemyProjectile.set_position(posX, posY)
         angle = ( calcAngle(enemyOne.x - (enemyOne.width / 2), enemyOne.y - (enemyOne.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
         velX = Math.sin(angle) * speed
         velY = Math.cos(angle) * speed
         enemyProjectile.set_velocity(velX, velY)
+    elif typeBullet == 3:
+        #Direct laser shot towards the a target.
+        currentPosX = posX
+        currentPosY = posY
+        step = 0
+        angle = ( calcAngle(posX, posY, playerOne.x - (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )
+        sin = Math.sin(toRadians(angle))
+        cos = Math.cos(toRadians(angle))
+        toPos = (currentPosX + (distance * cos), currentPosY + (distance * sin))
+
+        while step != distance:
+            if currentPosX <= 0 or currentPosX >= 160 or currentPosY <= 0 or currentPosY >= 120:
+                break
+            enemyProjectile = sprites.create(assets.image("""LaserSegmentUncharged"""),SpriteKind.EnemyProjLaser)
+            enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
+            enemyProjectile.set_position(currentPosX, currentPosY)
+            sprites.set_data_boolean(enemyProjectile, "charged", False)
+            sprites.set_data_number(enemyProjectile, "lifeTimer", 0)
+            currentPosX += (enemyProjectile.width) * sin
+            currentPosY += (enemyProjectile.height) * cos
+            step += 1
+
+
+def toRadians(degrees):
+    return degrees * Math.PI / 180
 
 def updateEnemyGroup():
     for enemy in enemyList:
@@ -337,16 +382,20 @@ def updateEnemyGroup():
             sprites.destroy(enemy)
             return
 
-        if enemyShootDelay <= 0 and playerDist <= 80 and not playerDist <= 30:
-            enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
-            enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
-            enemyProjectile.set_position(enemy.x, enemy.y)
-            angle = ( calcAngle(enemy.x - (enemy.width / 2), enemy.y - (enemy.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
-            angle += randint(-0.5, 0.5)
-            velX = Math.sin(angle) * 125
-            velY = Math.cos(angle) * 125
-            enemyProjectile.set_velocity(velX, velY)    
-            sprites.set_data_number(enemy, "shootDelay", 55 + randint(20, 25))
+        if enemyShootDelay <= 0 and playerDist <= 90 and not playerDist <= 40:
+
+            #enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
+            #enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
+            #enemyProjectile.set_position(enemy.x, enemy.y)
+            #angle = ( calcAngle(enemy.x - (enemy.width / 2), enemy.y - (enemy.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
+            #angle += randint(-0.5, 0.5)
+            #velX = Math.sin(angle) * 125
+            #velY = Math.cos(angle) * 125
+            #enemyProjectile.set_velocity(velX, velY)    
+
+            shootBullets(enemy.x, enemy.y, 0, 100, 0, 3, 0)
+
+            sprites.set_data_number(enemy, "shootDelay", 45 + randint(10, 20))
         else:
             sprites.set_data_number(enemy, "shootDelay", enemyShootDelay - 1)
 
@@ -416,8 +465,9 @@ def spawnEnemy():
     enemyList.push(tempEnemy)
 
 def startScrollingBG():
+    global bgVSpeed
     scene.set_background_image(assets.image("""BackgroundLayer1"""))
-    scroller.scroll_background_with_speed(0, 10)
+    scroller.scroll_background_with_speed(0, bgVSpeed)
 
 enemyList: List[Sprite] = []
 moveSpeed = 0
@@ -447,13 +497,14 @@ info.set_life(3)
 fireType = 0
 #isAgro = False
 score = 0
+bgVSpeed = 50
 
 #Update 2
 
-#spawnEnemy()
-#spawnEnemy()
+spawnEnemy()
+spawnEnemy()
 
-#enemyStage = 3
+enemyStage = 4
 
 startScrollingBG()
 def on_forever():

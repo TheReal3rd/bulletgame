@@ -69,6 +69,16 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "BackgroundLayer2"
     },
+    "image15": {
+        "data": "hwQCAAIAAAAiAAAAIgAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "LaserSegment"
+    },
+    "image16": {
+        "data": "hwQCAAIAAADdAAAA3QAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "LaserSegmentUncharged"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",
