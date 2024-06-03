@@ -74,8 +74,11 @@ def collision():
 
         if lifeTimer >= 40:
             sprites.set_data_boolean(laserSeg, "charged", True)
-            laserSeg.set_image(assets.image("""LaserSegment"""))
+            laserSeg.set_image(assets.image("""LaserSegment"""))                    
+
             if lifeTimer >= 60:
+                if Math.percent_chance(22):
+                    laserSeg.start_effect(effects.fire, 100)
                 sprites.destroy(laserSeg)
 
             if not screenFlash and playerOne.overlaps_with(laserSeg):
@@ -125,7 +128,7 @@ def updatePlayer():
     if screenFlash:
         scene.set_background_image(assets.image("""BackgroundLayer2"""))
         scene.camera_shake(2, 400)
-        if screenFlashTimer.passed(200):
+        if screenFlashTimer.passed(400):
             scene.set_background_image(assets.image("""BackgroundLayer1"""))
             screenFlash = False
 
@@ -265,9 +268,12 @@ def updateEnemy():
         #Checks if the enemy is dead if so next stage. If its end stage it'll destroy the enemy.
         info.set_life(info.life() + 3)
         enemyStage += 1
-        enemyHealth = 30
-        if enemyStage >= 3:
+        enemyHealth = 25
+        if enemyStage >= 2:
             sprites.destroy(enemyOne)
+            spawnEnemy()
+            spawnEnemy()
+
 
 def endGame():
     #Final stage is beaten send win screen.
@@ -346,7 +352,7 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
         currentPosX = posX
         currentPosY = posY
         step = 0
-        angle = ( calcAngle(posX, posY, playerOne.x - (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )
+        angle = ( calcAngle(posX, posY, playerOne.x, playerOne.y) )
         sin = Math.sin(toRadians(angle))
         cos = Math.cos(toRadians(angle))
         toPos = (currentPosX + (distance * cos), currentPosY + (distance * sin))
@@ -368,7 +374,16 @@ def toRadians(degrees):
     return degrees * Math.PI / 180
 
 def updateEnemyGroup():
-    for enemy in enemyList:
+    print(enemyList.length)
+
+    toRemove = []
+    if enemyList.length == 0:
+        endGame()
+
+    index = 0
+    while index != enemyList.length:
+        enemy = enemyList[index]
+        index += 1
         waypointPos = (
             sprites.read_data_number(enemy, "waypointX"),
             sprites.read_data_number(enemy, "waypointY")
@@ -380,21 +395,11 @@ def updateEnemyGroup():
     
         if sprites.read_data_number(enemy, "health") <= 0:
             sprites.destroy(enemy)
-            return
+            toRemove.push(index)
+            continue
 
         if enemyShootDelay <= 0 and playerDist <= 90 and not playerDist <= 40:
-
-            #enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
-            #enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
-            #enemyProjectile.set_position(enemy.x, enemy.y)
-            #angle = ( calcAngle(enemy.x - (enemy.width / 2), enemy.y - (enemy.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
-            #angle += randint(-0.5, 0.5)
-            #velX = Math.sin(angle) * 125
-            #velY = Math.cos(angle) * 125
-            #enemyProjectile.set_velocity(velX, velY)    
-
-            shootBullets(enemy.x, enemy.y, 0, 100, 0, 3, 0)
-
+            shootBullets(enemy.x, enemy.y + (enemy.height / 2), 0, 100, 0, 3, 0)
             sprites.set_data_number(enemy, "shootDelay", 45 + randint(10, 20))
         else:
             sprites.set_data_number(enemy, "shootDelay", enemyShootDelay - 1)
@@ -440,6 +445,9 @@ def updateEnemyGroup():
                 enemy.y -= 2
             elif waypointPos[1] > enemy.y:
                 enemy.y += 2
+
+    for slot in toRemove:
+        enemyList.remove_at(slot)
         
 
 def spawnEnemy():
@@ -501,10 +509,10 @@ bgVSpeed = 50
 
 #Update 2
 
-spawnEnemy()
-spawnEnemy()
+#spawnEnemy()
+#spawnEnemy()
 
-enemyStage = 4
+#enemyStage = 3
 
 startScrollingBG()
 def on_forever():

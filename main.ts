@@ -121,6 +121,10 @@ function collision() {
             sprites.setDataBoolean(laserSeg, "charged", true)
             laserSeg.setImage(assets.image`LaserSegment`)
             if (lifeTimer >= 60) {
+                if (Math.percentChance(22)) {
+                    laserSeg.startEffect(effects.fire, 100)
+                }
+                
                 sprites.destroy(laserSeg)
             }
             
@@ -187,7 +191,7 @@ function updatePlayer() {
     if (screenFlash) {
         scene.setBackgroundImage(assets.image`BackgroundLayer2`)
         scene.cameraShake(2, 400)
-        if (screenFlashTimer.passed(200)) {
+        if (screenFlashTimer.passed(400)) {
             scene.setBackgroundImage(assets.image`BackgroundLayer1`)
             screenFlash = false
         }
@@ -391,9 +395,11 @@ function updateEnemy() {
         // Checks if the enemy is dead if so next stage. If its end stage it'll destroy the enemy.
         info.setLife(info.life() + 3)
         enemyStage += 1
-        enemyHealth = 30
-        if (enemyStage >= 3) {
+        enemyHealth = 25
+        if (enemyStage >= 2) {
             sprites.destroy(enemyOne)
+            spawnEnemy()
+            spawnEnemy()
         }
         
     }
@@ -503,7 +509,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
         currentPosX = posX
         currentPosY = posY
         step = 0
-        angle = calcAngle(posX, posY, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2)
+        angle = calcAngle(posX, posY, playerOne.x, playerOne.y)
         sin = Math.sin(toRadians(angle))
         cos = Math.cos(toRadians(angle))
         toPos = [currentPosX + distance * cos, currentPosY + distance * sin]
@@ -530,6 +536,7 @@ function toRadians(degrees: number): number {
 }
 
 function updateEnemyGroup() {
+    let enemy: Sprite;
     let waypointPos: number[];
     let waypointDist: number;
     let playerDist: number;
@@ -540,7 +547,16 @@ function updateEnemyGroup() {
     let iterLimit: number;
     let tPosX: number;
     let tPosY: number;
-    for (let enemy of enemyList) {
+    console.log(enemyList.length)
+    let toRemove = []
+    if (enemyList.length == 0) {
+        endGame()
+    }
+    
+    let index = 0
+    while (index != enemyList.length) {
+        enemy = enemyList[index]
+        index += 1
         waypointPos = [sprites.readDataNumber(enemy, "waypointX"), sprites.readDataNumber(enemy, "waypointY")]
         waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
         playerDist = calcDist(enemy.x, enemy.y, playerOne.x, playerOne.y)
@@ -548,19 +564,12 @@ function updateEnemyGroup() {
         enemyMoveDelay = sprites.readDataNumber(enemy, "moveDelay")
         if (sprites.readDataNumber(enemy, "health") <= 0) {
             sprites.destroy(enemy)
-            return
+            toRemove.push(index)
+            continue
         }
         
         if (enemyShootDelay <= 0 && playerDist <= 90 && !(playerDist <= 40)) {
-            // enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
-            // enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
-            // enemyProjectile.set_position(enemy.x, enemy.y)
-            // angle = ( calcAngle(enemy.x - (enemy.width / 2), enemy.y - (enemy.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
-            // angle += randint(-0.5, 0.5)
-            // velX = Math.sin(angle) * 125
-            // velY = Math.cos(angle) * 125
-            // enemyProjectile.set_velocity(velX, velY)    
-            shootBullets(enemy.x, enemy.y, 0, 100, 0, 3, 0)
+            shootBullets(enemy.x, enemy.y + enemy.height / 2, 0, 100, 0, 3, 0)
             sprites.setDataNumber(enemy, "shootDelay", 45 + randint(10, 20))
         } else {
             sprites.setDataNumber(enemy, "shootDelay", enemyShootDelay - 1)
@@ -621,6 +630,9 @@ function updateEnemyGroup() {
         }
         
     }
+    for (let slot of toRemove) {
+        enemyList.removeAt(slot)
+    }
 }
 
 function spawnEnemy() {
@@ -677,9 +689,9 @@ let fireType = 0
 let score = 0
 let bgVSpeed = 50
 // Update 2
-spawnEnemy()
-spawnEnemy()
-enemyStage = 4
+// spawnEnemy()
+// spawnEnemy()
+// enemyStage = 3
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true
