@@ -874,22 +874,22 @@ ffcffffffffffffffffffffffcffffffffffffffffcffffffffffffffffffffffcffffffffffffff
 `;
             case "image19":
             case "BigBoss":return img`
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+f f f f f f f f f f f f f f f f 
+f f 4 2 2 f f f f f 4 2 2 f f f 
+f f f f f f f f f f f f f f f f 
+f f f 1 1 f f f f f f 1 1 f f f 
+f f f 1 2 f f f f f f 1 2 f f f 
+f f f f f f f f f f f f f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+f f 4 4 4 2 2 2 2 2 2 2 2 f f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
 `;
         }
         return null;

@@ -374,11 +374,10 @@ def toRadians(degrees):
     return degrees * Math.PI / 180
 
 def updateEnemyGroup():
-    print(enemyList.length)
-
-    toRemove = []
-    if enemyList.length == 0:
-        endGame()
+    print("Enemy Update"+enemyList.length)
+    if enemyList.length <= 0:
+        #endGame()
+        return
 
     index = 0
     while index != enemyList.length:
@@ -395,7 +394,7 @@ def updateEnemyGroup():
     
         if sprites.read_data_number(enemy, "health") <= 0:
             sprites.destroy(enemy)
-            toRemove.push(index)
+            toRemove = index
             continue
 
         if enemyShootDelay <= 0 and playerDist <= 90 and not playerDist <= 40:
@@ -446,8 +445,9 @@ def updateEnemyGroup():
             elif waypointPos[1] > enemy.y:
                 enemy.y += 2
 
-    for slot in toRemove:
-        enemyList.remove_at(slot)
+    if not toRemove == -1:
+        enemyList.remove_at(toRemove)
+        toRemove = -1
         
 
 def spawnEnemy():
@@ -477,11 +477,28 @@ def startScrollingBG():
     scene.set_background_image(assets.image("""BackgroundLayer1"""))
     scroller.scroll_background_with_speed(0, bgVSpeed)
 
+def startBigBass():
+    #BigBoss
+    bigBoss = sprites.create(assets.image("""BigBoss"""))
+    bigBoss.set_scale(3.5)
+    bigBoss.set_position(80, (-bigBoss.height * 2))
+
+    sprites.set_data_number(bigBoss, "health", 300)
+    sprites.set_data_number(bigBoss, "bullletType", 0)
+    sprites.set_data_number(bigBoss, "shootDelay", 1)
+    sprites.set_data_number(bigBoss, "waypointX", -1)
+    sprites.set_data_number(bigBoss, "waypointY", -1)
+
+
+
+
+
 enemyList: List[Sprite] = []
 moveSpeed = 0
 screenFlash = False
 playerOne: Sprite = None
 enemyHealth = 30
+toRemove = -1
 enemyOne: Sprite = None
 waypoint: any = (80, 15)
 fireDelay = msDelay()
@@ -512,7 +529,7 @@ bgVSpeed = 50
 #spawnEnemy()
 #spawnEnemy()
 
-#enemyStage = 3
+#enemyStage = 4
 
 startScrollingBG()
 def on_forever():

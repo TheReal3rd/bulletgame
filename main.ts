@@ -542,15 +542,16 @@ function updateEnemyGroup() {
     let playerDist: number;
     let enemyShootDelay: number;
     let enemyMoveDelay: number;
+    let toRemove: number;
     let goodWaypoint: boolean;
     let distToPlayer: number;
     let iterLimit: number;
     let tPosX: number;
     let tPosY: number;
-    console.log(enemyList.length)
-    let toRemove = []
-    if (enemyList.length == 0) {
-        endGame()
+    console.log("Enemy Update" + enemyList.length)
+    if (enemyList.length <= 0) {
+        // endGame()
+        return
     }
     
     let index = 0
@@ -564,7 +565,7 @@ function updateEnemyGroup() {
         enemyMoveDelay = sprites.readDataNumber(enemy, "moveDelay")
         if (sprites.readDataNumber(enemy, "health") <= 0) {
             sprites.destroy(enemy)
-            toRemove.push(index)
+            toRemove = index
             continue
         }
         
@@ -630,9 +631,11 @@ function updateEnemyGroup() {
         }
         
     }
-    for (let slot of toRemove) {
-        enemyList.removeAt(slot)
+    if (!(toRemove == -1)) {
+        enemyList.removeAt(toRemove)
+        toRemove = -1
     }
+    
 }
 
 function spawnEnemy() {
@@ -659,11 +662,24 @@ function startScrollingBG() {
     scroller.scrollBackgroundWithSpeed(0, bgVSpeed)
 }
 
+function startBigBass() {
+    // BigBoss
+    let bigBoss = sprites.create(assets.image`BigBoss`)
+    bigBoss.setScale(3.5)
+    bigBoss.setPosition(80, -bigBoss.height * 2)
+    sprites.setDataNumber(bigBoss, "health", 300)
+    sprites.setDataNumber(bigBoss, "bullletType", 0)
+    sprites.setDataNumber(bigBoss, "shootDelay", 1)
+    sprites.setDataNumber(bigBoss, "waypointX", -1)
+    sprites.setDataNumber(bigBoss, "waypointY", -1)
+}
+
 let enemyList : Sprite[] = []
 let moveSpeed = 0
 let screenFlash = false
 let playerOne : Sprite = null
 let enemyHealth = 30
+let toRemove = -1
 let enemyOne : Sprite = null
 let waypoint = [80, 15]
 let fireDelay = new msDelay()
@@ -691,7 +707,7 @@ let bgVSpeed = 50
 // Update 2
 // spawnEnemy()
 // spawnEnemy()
-// enemyStage = 3
+// enemyStage = 4
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true
