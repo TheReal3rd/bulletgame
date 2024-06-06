@@ -542,15 +542,15 @@ function updateEnemyGroup() {
     let playerDist: number;
     let enemyShootDelay: number;
     let enemyMoveDelay: number;
-    let toRemove: number;
     let goodWaypoint: boolean;
     let distToPlayer: number;
     let iterLimit: number;
     let tPosX: number;
     let tPosY: number;
-    console.log("Enemy Update" + enemyList.length)
+    
+    // print("Enemy Update"+enemyList.length)
     if (enemyList.length <= 0) {
-        // endGame()
+        endGame()
         return
     }
     
@@ -566,12 +566,14 @@ function updateEnemyGroup() {
         if (sprites.readDataNumber(enemy, "health") <= 0) {
             sprites.destroy(enemy)
             toRemove = index
+            numShipsDefeated += 1
             continue
         }
         
+        // TODO Shoot 3 Bullets then laser
         if (enemyShootDelay <= 0 && playerDist <= 90 && !(playerDist <= 40)) {
             shootBullets(enemy.x, enemy.y + enemy.height / 2, 0, 100, 0, 3, 0)
-            sprites.setDataNumber(enemy, "shootDelay", 45 + randint(10, 20))
+            sprites.setDataNumber(enemy, "shootDelay", 30 + randint(10, 20))
         } else {
             sprites.setDataNumber(enemy, "shootDelay", enemyShootDelay - 1)
         }
@@ -639,6 +641,7 @@ function updateEnemyGroup() {
 }
 
 function spawnEnemy() {
+    
     let tempEnemy = sprites.create(assets.image`Space Ship`, SpriteKind.Enemy)
     // Position
     let randomX = randint(20, 140)
@@ -647,9 +650,9 @@ function spawnEnemy() {
     // Data
     sprites.setDataNumber(tempEnemy, "waypointX", randomX)
     sprites.setDataNumber(tempEnemy, "waypointY", randomY)
-    sprites.setDataNumber(tempEnemy, "health", 10)
-    sprites.setDataNumber(tempEnemy, "shootDelay", 55)
-    sprites.setDataNumber(tempEnemy, "moveDelay", 50)
+    sprites.setDataNumber(tempEnemy, "health", 20)
+    sprites.setDataNumber(tempEnemy, "shootDelay", 30)
+    sprites.setDataNumber(tempEnemy, "moveDelay", 40)
     // Spawn animation
     sprites.setDataBoolean(tempEnemy, "anim", true)
     // Push to list
@@ -663,8 +666,9 @@ function startScrollingBG() {
 }
 
 function startBigBass() {
+    
     // BigBoss
-    let bigBoss = sprites.create(assets.image`BigBoss`)
+    bigBoss = sprites.create(assets.image`BigBoss`)
     bigBoss.setScale(3.5)
     bigBoss.setPosition(80, -bigBoss.height * 2)
     sprites.setDataNumber(bigBoss, "health", 300)
@@ -674,6 +678,13 @@ function startBigBass() {
     sprites.setDataNumber(bigBoss, "waypointY", -1)
 }
 
+function updateBigBoss() {
+    
+    let waypoint = [sprites.readDataNumber(bigBoss, "waypointX"), sprites.readDataNumber(bigBoss, "waypointY")]
+}
+
+let bigBoss : Sprite = null
+let numShipsDefeated = 0
 let enemyList : Sprite[] = []
 let moveSpeed = 0
 let screenFlash = false

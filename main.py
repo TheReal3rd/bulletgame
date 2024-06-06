@@ -374,9 +374,10 @@ def toRadians(degrees):
     return degrees * Math.PI / 180
 
 def updateEnemyGroup():
-    print("Enemy Update"+enemyList.length)
+    global enemyList, numShipsDefeated, toRemove
+    #print("Enemy Update"+enemyList.length)
     if enemyList.length <= 0:
-        #endGame()
+        endGame()
         return
 
     index = 0
@@ -395,11 +396,13 @@ def updateEnemyGroup():
         if sprites.read_data_number(enemy, "health") <= 0:
             sprites.destroy(enemy)
             toRemove = index
+            numShipsDefeated += 1
             continue
 
+        #TODO Shoot 3 Bullets then laser
         if enemyShootDelay <= 0 and playerDist <= 90 and not playerDist <= 40:
             shootBullets(enemy.x, enemy.y + (enemy.height / 2), 0, 100, 0, 3, 0)
-            sprites.set_data_number(enemy, "shootDelay", 45 + randint(10, 20))
+            sprites.set_data_number(enemy, "shootDelay", 30 + randint(10, 20))
         else:
             sprites.set_data_number(enemy, "shootDelay", enemyShootDelay - 1)
 
@@ -448,9 +451,9 @@ def updateEnemyGroup():
     if not toRemove == -1:
         enemyList.remove_at(toRemove)
         toRemove = -1
-        
 
 def spawnEnemy():
+    global enemyList
     tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.enemy)
 
     #Position
@@ -462,9 +465,9 @@ def spawnEnemy():
     #Data
     sprites.set_data_number(tempEnemy, "waypointX", randomX)
     sprites.set_data_number(tempEnemy, "waypointY", randomY)
-    sprites.set_data_number(tempEnemy, "health", 10)
-    sprites.set_data_number(tempEnemy, "shootDelay", 55)
-    sprites.set_data_number(tempEnemy, "moveDelay", 50)
+    sprites.set_data_number(tempEnemy, "health", 20)
+    sprites.set_data_number(tempEnemy, "shootDelay", 30)
+    sprites.set_data_number(tempEnemy, "moveDelay", 40)
 
     #Spawn animation
     sprites.set_data_boolean(tempEnemy, "anim", True)
@@ -478,6 +481,7 @@ def startScrollingBG():
     scroller.scroll_background_with_speed(0, bgVSpeed)
 
 def startBigBass():
+    global bigBoss
     #BigBoss
     bigBoss = sprites.create(assets.image("""BigBoss"""))
     bigBoss.set_scale(3.5)
@@ -490,9 +494,13 @@ def startBigBass():
     sprites.set_data_number(bigBoss, "waypointY", -1)
 
 
+def updateBigBoss():
+    global bigBoss
+    waypoint = ( sprites.read_data_number(bigBoss, "waypointX"), sprites.read_data_number(bigBoss, "waypointY") )
 
 
-
+bigBoss: Sprite = None
+numShipsDefeated = 0
 enemyList: List[Sprite] = []
 moveSpeed = 0
 screenFlash = False
