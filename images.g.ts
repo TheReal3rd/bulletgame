@@ -891,6 +891,20 @@ f 4 f f f f f f f f f f f 2 f f
 f f f f f f f f f f f f f f f f 
 f f f f f f f f f f f f f f f f 
 `;
+            case "image21":
+            case "EnemyInactiveSeeker":return img`
+. 2 2 . 
+2 f f 2 
+2 f f 2 
+. 2 2 . 
+`;
+            case "image20":
+            case "EnemyActiveSeeker":return img`
+. 2 2 . 
+2 7 7 2 
+2 7 7 2 
+. 2 2 . 
+`;
         }
         return null;
     })

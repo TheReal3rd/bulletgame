@@ -2,6 +2,7 @@ namespace SpriteKind {
     export const EnemyProjectile = SpriteKind.create()
     export const EnemyProjFlak = SpriteKind.create()
     export const EnemyProjLaser = SpriteKind.create()
+    export const EnemyHeatSeeker = SpriteKind.create()
 }
 
 class msDelay {
@@ -44,6 +45,11 @@ msDelay.__initmsDelay()
 function collision() {
     let dist: number;
     let lifeTimer: number;
+    let speed: number;
+    let angle: number;
+    let velX: number;
+    let velY: number;
+    // TODO this will need a clean up.
     
     if (!screenFlash) {
         for (let value of sprites.allOfKind(SpriteKind.EnemyProjectile)) {
@@ -136,6 +142,28 @@ function collision() {
                 screenFlashTimer.reset()
             }
             
+        }
+        
+    }
+    for (let seeker of sprites.allOfKind(SpriteKind.EnemyHeatSeeker)) {
+        lifeTimer = sprites.readDataNumber(seeker, "lifeTimer")
+        if (lifeTimer <= 40) {
+            speed = sprites.readDataNumber(seeker, "speed")
+            angle = calcAngle(seeker.x - seeker.width / 2, seeker.y - seeker.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
+            velX = Math.sin(angle) * speed
+            velY = Math.cos(angle) * speed
+            seeker.setVelocity(velX, velY)
+            sprites.setDataNumber(seeker, "lifeTimer", lifeTimer + 1)
+        } else {
+            seeker.setImage(assets.image`EnemyInactiveSeeker`)
+        }
+        
+        if (!screenFlash && playerOne.overlapsWith(seeker)) {
+            seeker.startEffect(effects.fire, 100)
+            sprites.destroy(seeker)
+            info.changeLifeBy(-1)
+            screenFlash = true
+            screenFlashTimer.reset()
         }
         
     }
@@ -395,7 +423,8 @@ function updateEnemy() {
         // Checks if the enemy is dead if so next stage. If its end stage it'll destroy the enemy.
         info.setLife(info.life() + 3)
         enemyStage += 1
-        enemyHealth = 25
+        enemyHealth = 1
+        // 25
         if (enemyStage >= 2) {
             sprites.destroy(enemyOne)
             spawnEnemy()
@@ -464,6 +493,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
     let sin: number;
     let cos: number;
     let toPos: any[];
+    let enProj: Sprite;
     // TODO Create limits for the shoot types. and defaults
     if (typeBullet == 0) {
         //  Circle shoot.
@@ -527,6 +557,17 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
             currentPosY += enemyProjectile.height * cos
             step += 1
         }
+    } else if (typeBullet == 4) {
+        // TODO heat seeking bullets
+        enProj = sprites.create(assets.image`EnemyActiveSeeker`, SpriteKind.EnemyHeatSeeker)
+        enProj.setFlag(SpriteFlag.AutoDestroy, true)
+        enProj.setPosition(posX, posY)
+        sprites.setDataNumber(enProj, "lifeTimer", 0)
+        sprites.setDataNumber(enProj, "speed", speed)
+        angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
+        velX = Math.sin(angle) * speed
+        velY = Math.cos(angle) * speed
+        enProj.setVelocity(velX, velY)
     }
     
 }
@@ -542,6 +583,8 @@ function updateEnemyGroup() {
     let playerDist: number;
     let enemyShootDelay: number;
     let enemyMoveDelay: number;
+    let shootToggle: boolean;
+    let shootCount: number;
     let goodWaypoint: boolean;
     let distToPlayer: number;
     let iterLimit: number;
@@ -563,17 +606,34 @@ function updateEnemyGroup() {
         playerDist = calcDist(enemy.x, enemy.y, playerOne.x, playerOne.y)
         enemyShootDelay = sprites.readDataNumber(enemy, "shootDelay")
         enemyMoveDelay = sprites.readDataNumber(enemy, "moveDelay")
+        shootToggle = sprites.readDataBoolean(enemy, "shootToggle")
         if (sprites.readDataNumber(enemy, "health") <= 0) {
             sprites.destroy(enemy)
-            toRemove = index
+            enemyList.removeElement(enemy)
             numShipsDefeated += 1
             continue
         }
         
-        // TODO Shoot 3 Bullets then laser
         if (enemyShootDelay <= 0 && playerDist <= 90 && !(playerDist <= 40)) {
-            shootBullets(enemy.x, enemy.y + enemy.height / 2, 0, 100, 0, 3, 0)
-            sprites.setDataNumber(enemy, "shootDelay", 30 + randint(10, 20))
+            if (shootToggle) {
+                // Shoot laser here
+                shootBullets(enemy.x, enemy.y + enemy.height / 2, 200, 100, 0, 3, 0)
+                sprites.setDataBoolean(enemy, "shootToggle", !shootToggle)
+                sprites.setDataNumber(enemy, "shootDelay", 40 + randint(5, 10))
+            } else {
+                // Shoot seekers here
+                shootCount = sprites.readDataNumber(enemy, "shootCounter")
+                shootBullets(enemy.x, enemy.y + enemy.height / 2, 90, 100, 0, 4, 0)
+                if (shootCount >= 1) {
+                    sprites.setDataNumber(enemy, "shootCounter", 0)
+                    sprites.setDataBoolean(enemy, "shootToggle", !shootToggle)
+                } else {
+                    sprites.setDataNumber(enemy, "shootCounter", shootCount + 1)
+                }
+                
+                sprites.setDataNumber(enemy, "shootDelay", 2)
+            }
+            
         } else {
             sprites.setDataNumber(enemy, "shootDelay", enemyShootDelay - 1)
         }
@@ -633,11 +693,6 @@ function updateEnemyGroup() {
         }
         
     }
-    if (!(toRemove == -1)) {
-        enemyList.removeAt(toRemove)
-        toRemove = -1
-    }
-    
 }
 
 function spawnEnemy() {
@@ -650,9 +705,11 @@ function spawnEnemy() {
     // Data
     sprites.setDataNumber(tempEnemy, "waypointX", randomX)
     sprites.setDataNumber(tempEnemy, "waypointY", randomY)
-    sprites.setDataNumber(tempEnemy, "health", 20)
+    sprites.setDataNumber(tempEnemy, "health", 10)
     sprites.setDataNumber(tempEnemy, "shootDelay", 30)
     sprites.setDataNumber(tempEnemy, "moveDelay", 40)
+    sprites.setDataBoolean(tempEnemy, "shootToggle", false)
+    sprites.setDataNumber(tempEnemy, "shootCounter", 0)
     // Spawn animation
     sprites.setDataBoolean(tempEnemy, "anim", true)
     // Push to list
@@ -689,7 +746,8 @@ let enemyList : Sprite[] = []
 let moveSpeed = 0
 let screenFlash = false
 let playerOne : Sprite = null
-let enemyHealth = 30
+let enemyHealth = 1
+// 30
 let toRemove = -1
 let enemyOne : Sprite = null
 let waypoint = [80, 15]
@@ -716,9 +774,9 @@ let fireType = 0
 let score = 0
 let bgVSpeed = 50
 // Update 2
-// spawnEnemy()
-// spawnEnemy()
-// enemyStage = 4
+spawnEnemy()
+spawnEnemy()
+enemyStage = 4
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true

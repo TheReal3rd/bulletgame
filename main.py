@@ -3,6 +3,7 @@ class SpriteKind:
     EnemyProjectile = SpriteKind.create()
     EnemyProjFlak = SpriteKind.create()   
     EnemyProjLaser = SpriteKind.create()
+    EnemyHeatSeeker = SpriteKind.create()
 
 class msDelay():
     counter = None
@@ -19,7 +20,7 @@ class msDelay():
     def reset(self):
         self.counter = game.runtime()
 
-def collision():
+def collision():#TODO this will need a clean up.
     global screenFlash, enemyHealth, score
     if not screenFlash:
         for value in sprites.all_of_kind(SpriteKind.EnemyProjectile):
@@ -87,8 +88,26 @@ def collision():
                 info.change_life_by(-1)
                 screenFlash = True
                 screenFlashTimer.reset()
-        
 
+    for seeker in sprites.all_of_kind(SpriteKind.EnemyHeatSeeker):
+        lifeTimer = sprites.read_data_number(seeker, "lifeTimer")
+
+        if lifeTimer <= 40:
+            speed = sprites.read_data_number(seeker, "speed")
+            angle = ( calcAngle(seeker.x - (seeker.width / 2), seeker.y - (seeker.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
+            velX = Math.sin(angle) * speed
+            velY = Math.cos(angle) * speed
+            seeker.set_velocity(velX, velY)
+            sprites.set_data_number(seeker, "lifeTimer", lifeTimer + 1)
+        else:
+            seeker.set_image(assets.image("EnemyInactiveSeeker"))
+
+        if not screenFlash and playerOne.overlaps_with(seeker):
+                seeker.start_effect(effects.fire, 100)
+                sprites.destroy(seeker)
+                info.change_life_by(-1)
+                screenFlash = True
+                screenFlashTimer.reset()
 
 def updatePlayer():
     global moveSpeed, fireType, fireDelay, screenFlash, screenFlashTimer, bgVSpeed
@@ -268,7 +287,7 @@ def updateEnemy():
         #Checks if the enemy is dead if so next stage. If its end stage it'll destroy the enemy.
         info.set_life(info.life() + 3)
         enemyStage += 1
-        enemyHealth = 25
+        enemyHealth = 1#25
         if enemyStage >= 2:
             sprites.destroy(enemyOne)
             spawnEnemy()
@@ -368,6 +387,17 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
             currentPosX += (enemyProjectile.width) * sin
             currentPosY += (enemyProjectile.height) * cos
             step += 1
+    elif typeBullet == 4:
+        #TODO heat seeking bullets
+        enProj = sprites.create(assets.image("""EnemyActiveSeeker"""), SpriteKind.EnemyHeatSeeker)
+        enProj.set_flag(SpriteFlag.AUTO_DESTROY, True)
+        enProj.set_position(posX, posY)
+        sprites.set_data_number(enProj, "lifeTimer", 0)
+        sprites.set_data_number(enProj, "speed", speed)
+        angle = ( calcAngle(enemyOne.x - (enemyOne.width / 2), enemyOne.y - (enemyOne.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
+        velX = Math.sin(angle) * speed
+        velY = Math.cos(angle) * speed
+        enProj.set_velocity(velX, velY)
 
 
 def toRadians(degrees):
@@ -392,17 +422,32 @@ def updateEnemyGroup():
         playerDist = calcDist(enemy.x, enemy.y, playerOne.x, playerOne.y)
         enemyShootDelay = sprites.read_data_number(enemy, "shootDelay")
         enemyMoveDelay = sprites.read_data_number(enemy, "moveDelay")
+        shootToggle = sprites.read_data_boolean(enemy, "shootToggle")
     
         if sprites.read_data_number(enemy, "health") <= 0:
             sprites.destroy(enemy)
-            toRemove = index
+            enemyList.remove_element(enemy)
             numShipsDefeated += 1
             continue
 
-        #TODO Shoot 3 Bullets then laser
         if enemyShootDelay <= 0 and playerDist <= 90 and not playerDist <= 40:
-            shootBullets(enemy.x, enemy.y + (enemy.height / 2), 0, 100, 0, 3, 0)
-            sprites.set_data_number(enemy, "shootDelay", 30 + randint(10, 20))
+            if shootToggle:
+                #Shoot laser here
+                shootBullets(enemy.x, enemy.y + (enemy.height / 2), 200, 100, 0, 3, 0)
+                sprites.set_data_boolean(enemy, "shootToggle", not shootToggle)
+                sprites.set_data_number(enemy, "shootDelay", 40 + randint(5, 10))
+            else:
+                #Shoot seekers here
+                shootCount = sprites.read_data_number(enemy, "shootCounter")
+                shootBullets(enemy.x, enemy.y + (enemy.height / 2), 90, 100, 0, 4, 0)
+
+                if shootCount >= 1:
+                    sprites.set_data_number(enemy, "shootCounter", 0)
+                    sprites.set_data_boolean(enemy, "shootToggle", not shootToggle)
+                else:
+                    sprites.set_data_number(enemy, "shootCounter", shootCount + 1)
+
+                sprites.set_data_number(enemy, "shootDelay", 2)  
         else:
             sprites.set_data_number(enemy, "shootDelay", enemyShootDelay - 1)
 
@@ -448,10 +493,6 @@ def updateEnemyGroup():
             elif waypointPos[1] > enemy.y:
                 enemy.y += 2
 
-    if not toRemove == -1:
-        enemyList.remove_at(toRemove)
-        toRemove = -1
-
 def spawnEnemy():
     global enemyList
     tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.enemy)
@@ -465,9 +506,11 @@ def spawnEnemy():
     #Data
     sprites.set_data_number(tempEnemy, "waypointX", randomX)
     sprites.set_data_number(tempEnemy, "waypointY", randomY)
-    sprites.set_data_number(tempEnemy, "health", 20)
+    sprites.set_data_number(tempEnemy, "health", 10)
     sprites.set_data_number(tempEnemy, "shootDelay", 30)
     sprites.set_data_number(tempEnemy, "moveDelay", 40)
+    sprites.set_data_boolean(tempEnemy, "shootToggle", False)
+    sprites.set_data_number(tempEnemy, "shootCounter", 0)
 
     #Spawn animation
     sprites.set_data_boolean(tempEnemy, "anim", True)
@@ -505,7 +548,7 @@ enemyList: List[Sprite] = []
 moveSpeed = 0
 screenFlash = False
 playerOne: Sprite = None
-enemyHealth = 30
+enemyHealth = 1#30
 toRemove = -1
 enemyOne: Sprite = None
 waypoint: any = (80, 15)
@@ -534,10 +577,10 @@ bgVSpeed = 50
 
 #Update 2
 
-#spawnEnemy()
-#spawnEnemy()
+spawnEnemy()
+spawnEnemy()
 
-#enemyStage = 4
+enemyStage = 4
 
 startScrollingBG()
 def on_forever():

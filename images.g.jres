@@ -94,6 +94,16 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "BigBoss"
     },
+    "image21": {
+        "data": "hwQEAAQAAAAgAgAA8i8AAPIvAAAgAgAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "EnemyInactiveSeeker"
+    },
+    "image20": {
+        "data": "hwQEAAQAAAAgAgAAcicAAHInAAAgAgAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "EnemyActiveSeeker"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",
