@@ -92,7 +92,7 @@ def collision():#TODO this will need a clean up.
     for seeker in sprites.all_of_kind(SpriteKind.EnemyHeatSeeker):
         lifeTimer = sprites.read_data_number(seeker, "lifeTimer")
 
-        if lifeTimer <= 40:
+        if lifeTimer <= 30:
             speed = sprites.read_data_number(seeker, "speed")
             angle = ( calcAngle(seeker.x - (seeker.width / 2), seeker.y - (seeker.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
             velX = Math.sin(angle) * speed
@@ -332,7 +332,7 @@ info.on_life_zero(on_life_zero)
 def shootBullets(posX: number, posY: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number):
     #TODO Create limits for the shoot types. and defaults
     if typeBullet == 0:
-        # Circle shoot.
+        # Circle shot.
         angle2 = -180
         while angle2 <= 180:
             oPosX = posX + distance * Math.sin(Math.PI * angle2 / 180)
@@ -345,7 +345,7 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
             enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
             angle2 += numBullets * 10
     elif typeBullet == 1:
-        # Laser Line Shoot
+        # Laser Line Shot
         angle = ( calcAngle(enemyOne.x - (enemyOne.width / 2), enemyOne.y - (enemyOne.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
         for x in range(-numBullets, numBullets):
             enemyProjectile = sprites.create(assets.image("""LaserPixel"""),SpriteKind.EnemyProjectile)
@@ -388,7 +388,7 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
             currentPosY += (enemyProjectile.height) * cos
             step += 1
     elif typeBullet == 4:
-        #TODO heat seeking bullets
+        #Seeking bullets
         enProj = sprites.create(assets.image("""EnemyActiveSeeker"""), SpriteKind.EnemyHeatSeeker)
         enProj.set_flag(SpriteFlag.AUTO_DESTROY, True)
         enProj.set_position(posX, posY)
@@ -405,7 +405,6 @@ def toRadians(degrees):
 
 def updateEnemyGroup():
     global enemyList, numShipsDefeated, toRemove
-    #print("Enemy Update"+enemyList.length)
     if enemyList.length <= 0:
         endGame()
         return
@@ -439,7 +438,7 @@ def updateEnemyGroup():
             else:
                 #Shoot seekers here
                 shootCount = sprites.read_data_number(enemy, "shootCounter")
-                shootBullets(enemy.x, enemy.y + (enemy.height / 2), 90, 100, 0, 4, 0)
+                shootBullets(enemy.x, enemy.y + (enemy.height / 2), 60, 100, 0, 4, 0)
 
                 if shootCount >= 1:
                     sprites.set_data_number(enemy, "shootCounter", 0)
@@ -447,7 +446,7 @@ def updateEnemyGroup():
                 else:
                     sprites.set_data_number(enemy, "shootCounter", shootCount + 1)
 
-                sprites.set_data_number(enemy, "shootDelay", 2)  
+                sprites.set_data_number(enemy, "shootDelay", 15)  
         else:
             sprites.set_data_number(enemy, "shootDelay", enemyShootDelay - 1)
 
@@ -458,7 +457,7 @@ def updateEnemyGroup():
                     sprites.set_data_boolean(enemy, "anim", False)
 
                 goodWaypoint = False
-
+                #TODO change this to a screen scan.
                 distToPlayer = 0
                 iterLimit = 200
                 while goodWaypoint == False:
@@ -474,7 +473,7 @@ def updateEnemyGroup():
                     tPosX = max(tPosX, 0)
                     tPosY = max(tPosY, 0)
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
-                    if  playerDist >= 70:
+                    if  playerDist >= 50:
                         goodWaypoint = True
 
                 if goodWaypoint:

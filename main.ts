@@ -147,7 +147,7 @@ function collision() {
     }
     for (let seeker of sprites.allOfKind(SpriteKind.EnemyHeatSeeker)) {
         lifeTimer = sprites.readDataNumber(seeker, "lifeTimer")
-        if (lifeTimer <= 40) {
+        if (lifeTimer <= 30) {
             speed = sprites.readDataNumber(seeker, "speed")
             angle = calcAngle(seeker.x - seeker.width / 2, seeker.y - seeker.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
             velX = Math.sin(angle) * speed
@@ -496,7 +496,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
     let enProj: Sprite;
     // TODO Create limits for the shoot types. and defaults
     if (typeBullet == 0) {
-        //  Circle shoot.
+        //  Circle shot.
         angle2 = -180
         while (angle2 <= 180) {
             oPosX = posX + distance * Math.sin(Math.PI * angle2 / 180)
@@ -510,7 +510,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
             angle2 += numBullets * 10
         }
     } else if (typeBullet == 1) {
-        //  Laser Line Shoot
+        //  Laser Line Shot
         angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
         for (let x = -numBullets; x < numBullets; x++) {
             enemyProjectile = sprites.create(assets.image`LaserPixel`, SpriteKind.EnemyProjectile)
@@ -558,7 +558,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
             step += 1
         }
     } else if (typeBullet == 4) {
-        // TODO heat seeking bullets
+        // Seeking bullets
         enProj = sprites.create(assets.image`EnemyActiveSeeker`, SpriteKind.EnemyHeatSeeker)
         enProj.setFlag(SpriteFlag.AutoDestroy, true)
         enProj.setPosition(posX, posY)
@@ -591,7 +591,6 @@ function updateEnemyGroup() {
     let tPosX: number;
     let tPosY: number;
     
-    // print("Enemy Update"+enemyList.length)
     if (enemyList.length <= 0) {
         endGame()
         return
@@ -623,7 +622,7 @@ function updateEnemyGroup() {
             } else {
                 // Shoot seekers here
                 shootCount = sprites.readDataNumber(enemy, "shootCounter")
-                shootBullets(enemy.x, enemy.y + enemy.height / 2, 90, 100, 0, 4, 0)
+                shootBullets(enemy.x, enemy.y + enemy.height / 2, 60, 100, 0, 4, 0)
                 if (shootCount >= 1) {
                     sprites.setDataNumber(enemy, "shootCounter", 0)
                     sprites.setDataBoolean(enemy, "shootToggle", !shootToggle)
@@ -631,7 +630,7 @@ function updateEnemyGroup() {
                     sprites.setDataNumber(enemy, "shootCounter", shootCount + 1)
                 }
                 
-                sprites.setDataNumber(enemy, "shootDelay", 2)
+                sprites.setDataNumber(enemy, "shootDelay", 15)
             }
             
         } else {
@@ -646,6 +645,7 @@ function updateEnemyGroup() {
                 }
                 
                 goodWaypoint = false
+                // TODO change this to a screen scan.
                 distToPlayer = 0
                 iterLimit = 200
                 while (goodWaypoint == false) {
@@ -663,7 +663,7 @@ function updateEnemyGroup() {
                     tPosX = Math.max(tPosX, 0)
                     tPosY = Math.max(tPosY, 0)
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
-                    if (playerDist >= 70) {
+                    if (playerDist >= 50) {
                         goodWaypoint = true
                     }
                     

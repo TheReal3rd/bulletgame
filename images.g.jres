@@ -104,6 +104,11 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "EnemyActiveSeeker"
     },
+    "image22": {
+        "data": "hwQQAB4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPAADw////////////////CwAA393d3d3d3d3d3d3d3QsA8N3d3d3d3d3d3d3d3d0LAADf3d3d3d3d3d3d3d3dCwAA8P///////////////wsAAAAAAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "myImage1"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",
