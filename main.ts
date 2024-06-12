@@ -423,8 +423,13 @@ function updateEnemy() {
         // Checks if the enemy is dead if so next stage. If its end stage it'll destroy the enemy.
         info.setLife(info.life() + 3)
         enemyStage += 1
-        enemyHealth = 1
-        // 25
+        if (debug) {
+            enemyHealth = 1
+        } else {
+            // 25
+            enemyHealth = 25
+        }
+        
         if (enemyStage >= 2) {
             sprites.destroy(enemyOne)
             spawnEnemy()
@@ -632,9 +637,9 @@ function updateEnemyGroup() {
             sprites.setDataNumber(enemy, "shootDelay", enemyShootDelay - 1)
         }
         
-        if (waypointDist <= 2) {
+        if (waypointDist <= 2.5) {
             if (enemyMoveDelay <= 0 || sprites.readDataNumber(enemy, "anim")) {
-                sprites.setDataNumber(enemy, "moveDelay", 50)
+                sprites.setDataNumber(enemy, "moveDelay", 60)
                 if (sprites.readDataBoolean(enemy, "anim")) {
                     sprites.setDataBoolean(enemy, "anim", false)
                 }
@@ -691,6 +696,7 @@ function updateEnemyGroup() {
 }
 
 function spawnEnemy() {
+    
     let tempEnemy = sprites.create(assets.image`Space Ship`, SpriteKind.EnemySpaceShip)
     // Position
     let randomX = randint(20, 140)
@@ -699,10 +705,14 @@ function spawnEnemy() {
     // Data
     sprites.setDataNumber(tempEnemy, "waypointX", randomX)
     sprites.setDataNumber(tempEnemy, "waypointY", randomY)
-    sprites.setDataNumber(tempEnemy, "health", 1)
-    // 10
+    if (debug) {
+        sprites.setDataNumber(tempEnemy, "health", 1)
+    } else {
+        sprites.setDataNumber(tempEnemy, "health", 10)
+    }
+    
     sprites.setDataNumber(tempEnemy, "shootDelay", 30)
-    sprites.setDataNumber(tempEnemy, "moveDelay", 40)
+    sprites.setDataNumber(tempEnemy, "moveDelay", 60)
     sprites.setDataBoolean(tempEnemy, "shootToggle", false)
     sprites.setDataNumber(tempEnemy, "shootCounter", 0)
     // Spawn animation
@@ -724,7 +734,7 @@ function startBigBoss() {
     bigBoss.setPosition(80, 60)
     sprites.setDataNumber(bigBoss, "health", 300)
     sprites.setDataNumber(bigBoss, "bullletType", 0)
-    sprites.setDataNumber(bigBoss, "shootDelay", 1)
+    sprites.setDataNumber(bigBoss, "shootDelay", 40)
     sprites.setDataNumber(bigBoss, "waypointX", -1)
     sprites.setDataNumber(bigBoss, "waypointY", -1)
 }
@@ -735,6 +745,14 @@ function updateBigBoss() {
     
     let waypoint = [sprites.readDataNumber(bigBoss, "waypointX"), sprites.readDataNumber(bigBoss, "waypointY")]
     let waypointDist = calcDist(bigBoss.x, bigBoss.y, waypoint[0], waypoint[1])
+    let shootDelay = sprites.readDataNumber(bigBoss, "shootDelay")
+    if (shootDelay <= 0) {
+        shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+        sprites.setDataNumber(bigBoss, "shootDelay", 40)
+    } else {
+        sprites.setDataNumber(bigBoss, "shootDelay", shootDelay - 1)
+    }
+    
     if (waypointDist <= 2) {
         randomX = randint(0, 160)
         randomY = randint(0, 120)
@@ -746,8 +764,7 @@ let bigBoss : Sprite = null
 let moveSpeed = 0
 let screenFlash = false
 let playerOne : Sprite = null
-let enemyHealth = 1
-// 30
+let enemyHealth = 30
 let enemyOne : Sprite = null
 let waypoint = [80, 15]
 let fireDelay = new msDelay()
@@ -772,16 +789,20 @@ let fireType = 0
 // isAgro = False
 let score = 0
 let bgVSpeed = 50
-// Update 2
-spawnEnemy()
-spawnEnemy()
-enemyStage = 2
+let debug = true
+if (debug) {
+    enemyHealth = 1
+}
+
+// spawnEnemy()
+// spawnEnemy()
+// enemyStage = 2
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true
     collision()
     updatePlayer()
-    if (enemyStage == 0 || enemyStage == 0) {
+    if (enemyStage == 0 || enemyStage == 1) {
         updateEnemy()
     }
     
@@ -790,7 +811,7 @@ forever(function on_forever() {
     }
     
     if (enemyStage == 3) {
-        
+        updateBigBoss()
     }
     
 })

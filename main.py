@@ -287,7 +287,10 @@ def updateEnemy():
         #Checks if the enemy is dead if so next stage. If its end stage it'll destroy the enemy.
         info.set_life(info.life() + 3)
         enemyStage += 1
-        enemyHealth = 1#25
+        if debug:
+            enemyHealth = 1#25
+        else:
+            enemyHealth = 25
         if enemyStage >= 2:
             sprites.destroy(enemyOne)
             spawnEnemy()
@@ -441,14 +444,13 @@ def updateEnemyGroup():
                     sprites.set_data_boolean(enemy, "shootToggle", not shootToggle)
                 else:
                     sprites.set_data_number(enemy, "shootCounter", shootCount + 1)
-
                 sprites.set_data_number(enemy, "shootDelay", 15)  
         else:
             sprites.set_data_number(enemy, "shootDelay", enemyShootDelay - 1)
 
-        if waypointDist <= 2:
+        if waypointDist <= 2.5:
             if enemyMoveDelay <= 0 or sprites.read_data_number(enemy, "anim"):
-                sprites.set_data_number(enemy, "moveDelay", 50)
+                sprites.set_data_number(enemy, "moveDelay", 60)
                 if sprites.read_data_boolean(enemy, "anim"):
                     sprites.set_data_boolean(enemy, "anim", False)
 
@@ -489,6 +491,7 @@ def updateEnemyGroup():
                 enemy.y += 2
 
 def spawnEnemy():
+    global debug
     tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.EnemySpaceShip)
 
     #Position
@@ -500,9 +503,12 @@ def spawnEnemy():
     #Data
     sprites.set_data_number(tempEnemy, "waypointX", randomX)
     sprites.set_data_number(tempEnemy, "waypointY", randomY)
-    sprites.set_data_number(tempEnemy, "health", 1)#10
+    if debug:
+        sprites.set_data_number(tempEnemy, "health", 1)
+    else:
+        sprites.set_data_number(tempEnemy, "health", 10)
     sprites.set_data_number(tempEnemy, "shootDelay", 30)
-    sprites.set_data_number(tempEnemy, "moveDelay", 40)
+    sprites.set_data_number(tempEnemy, "moveDelay", 60)
     sprites.set_data_boolean(tempEnemy, "shootToggle", False)
     sprites.set_data_number(tempEnemy, "shootCounter", 0)
 
@@ -525,7 +531,7 @@ def startBigBoss():
 
     sprites.set_data_number(bigBoss, "health", 300)
     sprites.set_data_number(bigBoss, "bullletType", 0)
-    sprites.set_data_number(bigBoss, "shootDelay", 1)
+    sprites.set_data_number(bigBoss, "shootDelay", 40)
     sprites.set_data_number(bigBoss, "waypointX", -1)
     sprites.set_data_number(bigBoss, "waypointY", -1)
 
@@ -535,18 +541,22 @@ def updateBigBoss():
     waypoint = ( sprites.read_data_number(bigBoss, "waypointX"), sprites.read_data_number(bigBoss, "waypointY") )
     waypointDist = calcDist(bigBoss.x, bigBoss.y, waypoint[0], waypoint[1])
 
+    shootDelay = sprites.read_data_number(bigBoss, "shootDelay")
+    if shootDelay <= 0:
+        shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+        sprites.set_data_number(bigBoss, "shootDelay", 40)
+    else:
+        sprites.set_data_number(bigBoss, "shootDelay",  shootDelay - 1)
+
     if waypointDist <= 2:
         randomX = randint(0, 160)
         randomY = randint(0, 120)
-
-
-
 
 bigBoss: Sprite = None
 moveSpeed = 0
 screenFlash = False
 playerOne: Sprite = None
-enemyHealth = 1#30
+enemyHealth = 30
 enemyOne: Sprite = None
 waypoint: any = (80, 15)
 fireDelay = msDelay()
@@ -572,22 +582,25 @@ fireType = 0
 score = 0
 bgVSpeed = 50
 
-#Update 2
+debug = True
 
-spawnEnemy()
-spawnEnemy()
+if debug:
+    enemyHealth = 1
 
-enemyStage = 2
+#spawnEnemy()
+#spawnEnemy()
+
+#enemyStage = 2
 
 startScrollingBG()
 def on_forever():
     game.stats = True
     collision()
     updatePlayer()
-    if enemyStage == 0 or enemyStage == 0:
+    if enemyStage == 0 or enemyStage == 1:
         updateEnemy()
     if enemyStage == 2: 
         updateEnemyGroup()
     if enemyStage == 3:
-        pass
+        updateBigBoss()
 forever(on_forever)
