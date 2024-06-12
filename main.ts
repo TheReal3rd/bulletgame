@@ -3,6 +3,7 @@ namespace SpriteKind {
     export const EnemyProjFlak = SpriteKind.create()
     export const EnemyProjLaser = SpriteKind.create()
     export const EnemyHeatSeeker = SpriteKind.create()
+    export const EnemySpaceShip = SpriteKind.create()
 }
 
 class msDelay {
@@ -87,7 +88,7 @@ function collision() {
         }
     } else {
         for (let value3 of sprites.allOfKind(SpriteKind.Projectile)) {
-            for (let enemy of enemyList) {
+            for (let enemy of sprites.allOfKind(SpriteKind.EnemySpaceShip)) {
                 dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
                 if (dist >= 10) {
                     continue
@@ -99,7 +100,6 @@ function collision() {
                     sprites.changeDataNumberBy(enemy, "health", -1)
                     if (sprites.readDataNumber(enemy, "Health") <= 0) {
                         sprites.destroy(enemy)
-                        enemyList.removeElement(enemy)
                     }
                     
                     score += 100
@@ -577,7 +577,6 @@ function toRadians(degrees: number): number {
 }
 
 function updateEnemyGroup() {
-    let enemy: Sprite;
     let waypointPos: number[];
     let waypointDist: number;
     let playerDist: number;
@@ -591,15 +590,13 @@ function updateEnemyGroup() {
     let tPosX: number;
     let tPosY: number;
     
-    if (enemyList.length <= 0) {
-        endGame()
+    if (sprites.allOfKind(SpriteKind.EnemySpaceShip).length <= 0) {
+        startBigBoss()
+        enemyStage += 1
         return
     }
     
-    let index = 0
-    while (index != enemyList.length) {
-        enemy = enemyList[index]
-        index += 1
+    for (let enemy of sprites.allOfKind(SpriteKind.EnemySpaceShip)) {
         waypointPos = [sprites.readDataNumber(enemy, "waypointX"), sprites.readDataNumber(enemy, "waypointY")]
         waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
         playerDist = calcDist(enemy.x, enemy.y, playerOne.x, playerOne.y)
@@ -608,8 +605,6 @@ function updateEnemyGroup() {
         shootToggle = sprites.readDataBoolean(enemy, "shootToggle")
         if (sprites.readDataNumber(enemy, "health") <= 0) {
             sprites.destroy(enemy)
-            enemyList.removeElement(enemy)
-            numShipsDefeated += 1
             continue
         }
         
@@ -696,8 +691,7 @@ function updateEnemyGroup() {
 }
 
 function spawnEnemy() {
-    
-    let tempEnemy = sprites.create(assets.image`Space Ship`, SpriteKind.Enemy)
+    let tempEnemy = sprites.create(assets.image`Space Ship`, SpriteKind.EnemySpaceShip)
     // Position
     let randomX = randint(20, 140)
     let randomY = randint(0, 20)
@@ -705,15 +699,14 @@ function spawnEnemy() {
     // Data
     sprites.setDataNumber(tempEnemy, "waypointX", randomX)
     sprites.setDataNumber(tempEnemy, "waypointY", randomY)
-    sprites.setDataNumber(tempEnemy, "health", 10)
+    sprites.setDataNumber(tempEnemy, "health", 1)
+    // 10
     sprites.setDataNumber(tempEnemy, "shootDelay", 30)
     sprites.setDataNumber(tempEnemy, "moveDelay", 40)
     sprites.setDataBoolean(tempEnemy, "shootToggle", false)
     sprites.setDataNumber(tempEnemy, "shootCounter", 0)
     // Spawn animation
     sprites.setDataBoolean(tempEnemy, "anim", true)
-    // Push to list
-    enemyList.push(tempEnemy)
 }
 
 function startScrollingBG() {
@@ -722,12 +715,13 @@ function startScrollingBG() {
     scroller.scrollBackgroundWithSpeed(0, bgVSpeed)
 }
 
-function startBigBass() {
+function startBigBoss() {
     
     // BigBoss
     bigBoss = sprites.create(assets.image`BigBoss`)
     bigBoss.setScale(3.5)
-    bigBoss.setPosition(80, -bigBoss.height * 2)
+    //  bigBoss.set_position(80, (-bigBoss.height * 2))
+    bigBoss.setPosition(80, 60)
     sprites.setDataNumber(bigBoss, "health", 300)
     sprites.setDataNumber(bigBoss, "bullletType", 0)
     sprites.setDataNumber(bigBoss, "shootDelay", 1)
@@ -736,19 +730,24 @@ function startBigBass() {
 }
 
 function updateBigBoss() {
+    let randomX: number;
+    let randomY: number;
     
     let waypoint = [sprites.readDataNumber(bigBoss, "waypointX"), sprites.readDataNumber(bigBoss, "waypointY")]
+    let waypointDist = calcDist(bigBoss.x, bigBoss.y, waypoint[0], waypoint[1])
+    if (waypointDist <= 2) {
+        randomX = randint(0, 160)
+        randomY = randint(0, 120)
+    }
+    
 }
 
 let bigBoss : Sprite = null
-let numShipsDefeated = 0
-let enemyList : Sprite[] = []
 let moveSpeed = 0
 let screenFlash = false
 let playerOne : Sprite = null
 let enemyHealth = 1
 // 30
-let toRemove = -1
 let enemyOne : Sprite = null
 let waypoint = [80, 15]
 let fireDelay = new msDelay()
@@ -776,16 +775,22 @@ let bgVSpeed = 50
 // Update 2
 spawnEnemy()
 spawnEnemy()
-enemyStage = 4
+enemyStage = 2
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true
     collision()
     updatePlayer()
-    if (enemyStage < 2) {
+    if (enemyStage == 0 || enemyStage == 0) {
         updateEnemy()
-    } else {
+    }
+    
+    if (enemyStage == 2) {
         updateEnemyGroup()
+    }
+    
+    if (enemyStage == 3) {
+        
     }
     
 })

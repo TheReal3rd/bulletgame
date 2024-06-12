@@ -4,6 +4,7 @@ class SpriteKind:
     EnemyProjFlak = SpriteKind.create()   
     EnemyProjLaser = SpriteKind.create()
     EnemyHeatSeeker = SpriteKind.create()
+    EnemySpaceShip = SpriteKind.create()
 
 class msDelay():
     counter = None
@@ -47,7 +48,7 @@ def collision():#TODO this will need a clean up.
                 score += 100
     else:
         for value3 in sprites.all_of_kind(SpriteKind.projectile):
-            for enemy in enemyList:
+            for enemy in sprites.all_of_kind(SpriteKind.EnemySpaceShip):
                 dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
                 if dist >= 10:
                     continue
@@ -57,7 +58,6 @@ def collision():#TODO this will need a clean up.
                     sprites.change_data_number_by(enemy, "health", -1)
                     if sprites.read_data_number(enemy, "Health") <= 0:
                         sprites.destroy(enemy)
-                        enemyList.remove_element(enemy)
                     score += 100  
 
     for value2 in sprites.all_of_kind(SpriteKind.EnemyProjFlak):
@@ -404,15 +404,13 @@ def toRadians(degrees):
     return degrees * Math.PI / 180
 
 def updateEnemyGroup():
-    global enemyList, numShipsDefeated, toRemove
-    if enemyList.length <= 0:
-        endGame()
+    global enemyStage
+    if len(sprites.all_of_kind(SpriteKind.EnemySpaceShip))<= 0:
+        startBigBoss()
+        enemyStage += 1
         return
 
-    index = 0
-    while index != enemyList.length:
-        enemy = enemyList[index]
-        index += 1
+    for enemy in sprites.all_of_kind(SpriteKind.EnemySpaceShip):
         waypointPos = (
             sprites.read_data_number(enemy, "waypointX"),
             sprites.read_data_number(enemy, "waypointY")
@@ -425,8 +423,6 @@ def updateEnemyGroup():
     
         if sprites.read_data_number(enemy, "health") <= 0:
             sprites.destroy(enemy)
-            enemyList.remove_element(enemy)
-            numShipsDefeated += 1
             continue
 
         if enemyShootDelay <= 0 and playerDist <= 90 and not playerDist <= 40:
@@ -493,8 +489,7 @@ def updateEnemyGroup():
                 enemy.y += 2
 
 def spawnEnemy():
-    global enemyList
-    tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.enemy)
+    tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.EnemySpaceShip)
 
     #Position
     randomX = randint(20, 140)
@@ -505,7 +500,7 @@ def spawnEnemy():
     #Data
     sprites.set_data_number(tempEnemy, "waypointX", randomX)
     sprites.set_data_number(tempEnemy, "waypointY", randomY)
-    sprites.set_data_number(tempEnemy, "health", 10)
+    sprites.set_data_number(tempEnemy, "health", 1)#10
     sprites.set_data_number(tempEnemy, "shootDelay", 30)
     sprites.set_data_number(tempEnemy, "moveDelay", 40)
     sprites.set_data_boolean(tempEnemy, "shootToggle", False)
@@ -514,20 +509,19 @@ def spawnEnemy():
     #Spawn animation
     sprites.set_data_boolean(tempEnemy, "anim", True)
 
-    #Push to list
-    enemyList.push(tempEnemy)
-
 def startScrollingBG():
     global bgVSpeed
     scene.set_background_image(assets.image("""BackgroundLayer1"""))
     scroller.scroll_background_with_speed(0, bgVSpeed)
 
-def startBigBass():
+def startBigBoss():
     global bigBoss
     #BigBoss
     bigBoss = sprites.create(assets.image("""BigBoss"""))
     bigBoss.set_scale(3.5)
-    bigBoss.set_position(80, (-bigBoss.height * 2))
+   # bigBoss.set_position(80, (-bigBoss.height * 2))
+
+    bigBoss.set_position(80, 60)
 
     sprites.set_data_number(bigBoss, "health", 300)
     sprites.set_data_number(bigBoss, "bullletType", 0)
@@ -539,16 +533,20 @@ def startBigBass():
 def updateBigBoss():
     global bigBoss
     waypoint = ( sprites.read_data_number(bigBoss, "waypointX"), sprites.read_data_number(bigBoss, "waypointY") )
+    waypointDist = calcDist(bigBoss.x, bigBoss.y, waypoint[0], waypoint[1])
+
+    if waypointDist <= 2:
+        randomX = randint(0, 160)
+        randomY = randint(0, 120)
+
+
 
 
 bigBoss: Sprite = None
-numShipsDefeated = 0
-enemyList: List[Sprite] = []
 moveSpeed = 0
 screenFlash = False
 playerOne: Sprite = None
 enemyHealth = 1#30
-toRemove = -1
 enemyOne: Sprite = None
 waypoint: any = (80, 15)
 fireDelay = msDelay()
@@ -579,15 +577,17 @@ bgVSpeed = 50
 spawnEnemy()
 spawnEnemy()
 
-enemyStage = 4
+enemyStage = 2
 
 startScrollingBG()
 def on_forever():
     game.stats = True
     collision()
     updatePlayer()
-    if enemyStage < 2:
+    if enemyStage == 0 or enemyStage == 0:
         updateEnemy()
-    else:
+    if enemyStage == 2: 
         updateEnemyGroup()
+    if enemyStage == 3:
+        pass
 forever(on_forever)
