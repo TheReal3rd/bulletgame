@@ -729,37 +729,71 @@ function startBigBoss() {
     
     // BigBoss
     bigBoss = sprites.create(assets.image`BigBoss`)
-    bigBoss.setScale(3.5)
-    //  bigBoss.set_position(80, (-bigBoss.height * 2))
+    bigBoss.setScale(2.0)
+    bigBoss.setPosition(80, -bigBoss.height * 2)
     bigBoss.setPosition(80, 60)
     sprites.setDataNumber(bigBoss, "health", 300)
     sprites.setDataNumber(bigBoss, "bullletType", 0)
     sprites.setDataNumber(bigBoss, "shootDelay", 40)
-    sprites.setDataNumber(bigBoss, "waypointX", -1)
-    sprites.setDataNumber(bigBoss, "waypointY", -1)
+    sprites.setDataNumber(bigBoss, "waypointX", 80)
+    sprites.setDataNumber(bigBoss, "waypointY", 60)
 }
 
 function updateBigBoss() {
+    let goodPos: boolean;
     let randomX: number;
     let randomY: number;
     
     let waypoint = [sprites.readDataNumber(bigBoss, "waypointX"), sprites.readDataNumber(bigBoss, "waypointY")]
     let waypointDist = calcDist(bigBoss.x, bigBoss.y, waypoint[0], waypoint[1])
+    //  Shooting Code
     let shootDelay = sprites.readDataNumber(bigBoss, "shootDelay")
     if (shootDelay <= 0) {
         shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+        shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
         sprites.setDataNumber(bigBoss, "shootDelay", 40)
     } else {
         sprites.setDataNumber(bigBoss, "shootDelay", shootDelay - 1)
     }
     
+    // Movement Code
     if (waypointDist <= 2) {
-        randomX = randint(0, 160)
-        randomY = randint(0, 120)
+        goodPos = false
+        while (goodPos == false) {
+            randomX = randint(0, 160)
+            randomY = randint(0, 120)
+            sprites.setDataNumber(bigBoss, "waypointX", randomX)
+            sprites.setDataNumber(bigBoss, "waypointY", randomY)
+            goodPos = true
+        }
+    } else {
+        if (bigBoss.x < waypoint[0]) {
+            bigBoss.x += 1
+        } else if (bigBoss.x > waypoint[0]) {
+            bigBoss.x -= 1
+        }
+        
+        // 
+        if (bigBoss.y < waypoint[1]) {
+            bigBoss.y += 1
+        } else if (bigBoss.y > waypoint[1]) {
+            bigBoss.y -= 1
+        }
+        
     }
     
 }
 
+// 
+//  TODO add Menu system
+//  With custmisable classes and diffculty levels.
+//    Rapid fire Class
+//    Shield class
+//    Missile Class
+//    1 Heart Mode
+//    Free mode (select any stage)
+//    Nightmare Mode
+// 
 let bigBoss : Sprite = null
 let moveSpeed = 0
 let screenFlash = false
@@ -789,7 +823,7 @@ let fireType = 0
 // isAgro = False
 let score = 0
 let bgVSpeed = 50
-let debug = true
+let debug = false
 if (debug) {
     enemyHealth = 1
 }

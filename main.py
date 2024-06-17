@@ -524,16 +524,16 @@ def startBigBoss():
     global bigBoss
     #BigBoss
     bigBoss = sprites.create(assets.image("""BigBoss"""))
-    bigBoss.set_scale(3.5)
-   # bigBoss.set_position(80, (-bigBoss.height * 2))
+    bigBoss.set_scale(2.0)
+    bigBoss.set_position(80, (-bigBoss.height * 2))
 
     bigBoss.set_position(80, 60)
 
     sprites.set_data_number(bigBoss, "health", 300)
     sprites.set_data_number(bigBoss, "bullletType", 0)
     sprites.set_data_number(bigBoss, "shootDelay", 40)
-    sprites.set_data_number(bigBoss, "waypointX", -1)
-    sprites.set_data_number(bigBoss, "waypointY", -1)
+    sprites.set_data_number(bigBoss, "waypointX", 80)
+    sprites.set_data_number(bigBoss, "waypointY", 60)
 
 
 def updateBigBoss():
@@ -541,17 +541,49 @@ def updateBigBoss():
     waypoint = ( sprites.read_data_number(bigBoss, "waypointX"), sprites.read_data_number(bigBoss, "waypointY") )
     waypointDist = calcDist(bigBoss.x, bigBoss.y, waypoint[0], waypoint[1])
 
+    # Shooting Code
     shootDelay = sprites.read_data_number(bigBoss, "shootDelay")
     if shootDelay <= 0:
         shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+        shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
         sprites.set_data_number(bigBoss, "shootDelay", 40)
     else:
         sprites.set_data_number(bigBoss, "shootDelay",  shootDelay - 1)
-
+    
+    #Movement Code
     if waypointDist <= 2:
-        randomX = randint(0, 160)
-        randomY = randint(0, 120)
+        goodPos = False
+        while goodPos == False:
+            randomX = randint(0, 160)
+            randomY = randint(0, 120)
 
+            sprites.set_data_number(bigBoss, "waypointX", randomX)
+            sprites.set_data_number(bigBoss, "waypointY", randomY)
+
+            goodPos = True
+    else:
+        if bigBoss.x < waypoint[0]:
+            bigBoss.x += 1        
+        elif bigBoss.x > waypoint[0]:
+            bigBoss.x -= 1#
+
+        if bigBoss.y < waypoint[1]:
+            bigBoss.y += 1
+        elif bigBoss.y > waypoint[1]:
+            bigBoss.y -= 1
+
+
+
+#
+# TODO add Menu system
+# With custmisable classes and diffculty levels.
+#   Rapid fire Class
+#   Shield class
+#   Missile Class
+#   1 Heart Mode
+#   Free mode (select any stage)
+#   Nightmare Mode
+#
 bigBoss: Sprite = None
 moveSpeed = 0
 screenFlash = False
@@ -582,7 +614,7 @@ fireType = 0
 score = 0
 bgVSpeed = 50
 
-debug = True
+debug = False
 
 if debug:
     enemyHealth = 1
