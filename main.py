@@ -108,6 +108,7 @@ def collision():#TODO this will need a clean up.
                 info.change_life_by(-1)
                 screenFlash = True
                 screenFlashTimer.reset()
+    
 
 def updatePlayer():
     global moveSpeed, fireType, fireDelay, screenFlash, screenFlashTimer, bgVSpeed
@@ -523,7 +524,7 @@ def startScrollingBG():
 def startBigBoss():
     global bigBoss
     #BigBoss
-    bigBoss = sprites.create(assets.image("""BigBoss"""))
+    bigBoss = sprites.create(assets.image("""BigBoss"""),)
     bigBoss.set_scale(2.0)
     bigBoss.set_position(80, (-bigBoss.height * 2))
 
@@ -614,7 +615,7 @@ fireType = 0
 score = 0
 bgVSpeed = 50
 
-debug = False
+debug = True
 
 if debug:
     enemyHealth = 1

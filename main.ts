@@ -823,7 +823,7 @@ let fireType = 0
 // isAgro = False
 let score = 0
 let bgVSpeed = 50
-let debug = false
+let debug = true
 if (debug) {
     enemyHealth = 1
 }
