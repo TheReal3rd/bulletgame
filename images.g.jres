@@ -114,6 +114,12 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "ButtonTemplate"
     },
+    "song1": {
+        "data": "00780004080200",
+        "mimeType": "application/mkcd-song",
+        "displayName": "mySong",
+        "namespace": "mySongs."
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",

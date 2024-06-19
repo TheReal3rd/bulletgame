@@ -69,103 +69,87 @@ function collision() {
             }
             
         }
+        //  Heat Seeking Bullets
+        for (let seeker of sprites.allOfKind(SpriteKind.EnemyHeatSeeker)) {
+            lifeTimer = sprites.readDataNumber(seeker, "lifeTimer")
+            if (lifeTimer <= 30) {
+                speed = sprites.readDataNumber(seeker, "speed")
+                angle = calcAngle(seeker.x - seeker.width / 2, seeker.y - seeker.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
+                velX = Math.sin(angle) * speed
+                velY = Math.cos(angle) * speed
+                seeker.setVelocity(velX, velY)
+                sprites.setDataNumber(seeker, "lifeTimer", lifeTimer + 1)
+            } else {
+                seeker.setImage(assets.image`EnemyInactiveSeeker`)
+            }
+            
+            if (playerOne.overlapsWith(seeker)) {
+                seeker.startEffect(effects.fire, 100)
+                sprites.destroy(seeker)
+                info.changeLifeBy(-1)
+                screenFlash = true
+                screenFlashTimer.reset()
+                break
+            }
+            
+        }
+        // Laser Segments
+        for (let laserSeg of sprites.allOfKind(SpriteKind.EnemyProjLaser)) {
+            lifeTimer = sprites.readDataNumber(laserSeg, "lifeTimer")
+            sprites.setDataNumber(laserSeg, "lifeTimer", lifeTimer + 1)
+            if (lifeTimer >= 40) {
+                sprites.setDataBoolean(laserSeg, "charged", true)
+                laserSeg.setImage(assets.image`LaserSegment`)
+                if (lifeTimer >= 60) {
+                    if (Math.percentChance(22)) {
+                        laserSeg.startEffect(effects.fire, 100)
+                    }
+                    
+                    sprites.destroy(laserSeg)
+                }
+                
+                if (playerOne.overlapsWith(laserSeg)) {
+                    laserSeg.startEffect(effects.fire, 100)
+                    sprites.destroy(laserSeg)
+                    info.changeLifeBy(-1)
+                    screenFlash = true
+                    screenFlashTimer.reset()
+                    break
+                }
+                
+            }
+            
+        }
+        for (let value2 of sprites.allOfKind(SpriteKind.EnemyProjFlak)) {
+            dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
+            if (dist >= 25) {
+                continue
+            } else {
+                value2.startEffect(effects.fire, 100)
+                sprites.destroy(value2)
+                shootBullets(value2.x, value2.y, 15, 5, 0, 0, 6)
+                break
+            }
+            
+        }
     }
     
-    if (enemyStage < 2) {
-        for (let value1 of sprites.allOfKind(SpriteKind.Projectile)) {
-            dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
+    // Cleaned up - Projectile Collision Detection
+    for (let value3 of sprites.allOfKind(SpriteKind.Projectile)) {
+        for (let enemy of sprites.allOfKind(SpriteKind.Enemy)) {
+            dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
             if (dist >= 10) {
                 continue
             }
             
-            if (enemyOne.overlapsWith(value1)) {
-                value1.startEffect(effects.fire, 100)
-                sprites.destroy(value1)
-                enemyHealth += 0 - 1
+            if (enemy.overlapsWith(value3)) {
+                value3.startEffect(effects.fire, 100)
+                sprites.destroy(value3)
+                sprites.changeDataNumberBy(enemy, "health", -1)
                 score += 100
             }
             
         }
-    } else {
-        for (let value3 of sprites.allOfKind(SpriteKind.Projectile)) {
-            for (let enemy of sprites.allOfKind(SpriteKind.EnemySpaceShip)) {
-                dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
-                if (dist >= 10) {
-                    continue
-                }
-                
-                if (enemy.overlapsWith(value3)) {
-                    value3.startEffect(effects.fire, 100)
-                    sprites.destroy(value3)
-                    sprites.changeDataNumberBy(enemy, "health", -1)
-                    if (sprites.readDataNumber(enemy, "Health") <= 0) {
-                        sprites.destroy(enemy)
-                    }
-                    
-                    score += 100
-                }
-                
-            }
-        }
-    }
-    
-    for (let value2 of sprites.allOfKind(SpriteKind.EnemyProjFlak)) {
-        dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
-        if (dist >= 25) {
-            continue
-        } else {
-            value2.startEffect(effects.fire, 100)
-            sprites.destroy(value2)
-            shootBullets(value2.x, value2.y, 15, 5, 0, 0, 6)
-        }
-        
-    }
-    for (let laserSeg of sprites.allOfKind(SpriteKind.EnemyProjLaser)) {
-        lifeTimer = sprites.readDataNumber(laserSeg, "lifeTimer")
-        sprites.setDataNumber(laserSeg, "lifeTimer", lifeTimer + 1)
-        if (lifeTimer >= 40) {
-            sprites.setDataBoolean(laserSeg, "charged", true)
-            laserSeg.setImage(assets.image`LaserSegment`)
-            if (lifeTimer >= 60) {
-                if (Math.percentChance(22)) {
-                    laserSeg.startEffect(effects.fire, 100)
-                }
-                
-                sprites.destroy(laserSeg)
-            }
-            
-            if (!screenFlash && playerOne.overlapsWith(laserSeg)) {
-                laserSeg.startEffect(effects.fire, 100)
-                sprites.destroy(laserSeg)
-                info.changeLifeBy(-1)
-                screenFlash = true
-                screenFlashTimer.reset()
-            }
-            
-        }
-        
-    }
-    for (let seeker of sprites.allOfKind(SpriteKind.EnemyHeatSeeker)) {
-        lifeTimer = sprites.readDataNumber(seeker, "lifeTimer")
-        if (lifeTimer <= 30) {
-            speed = sprites.readDataNumber(seeker, "speed")
-            angle = calcAngle(seeker.x - seeker.width / 2, seeker.y - seeker.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
-            velX = Math.sin(angle) * speed
-            velY = Math.cos(angle) * speed
-            seeker.setVelocity(velX, velY)
-            sprites.setDataNumber(seeker, "lifeTimer", lifeTimer + 1)
-        } else {
-            seeker.setImage(assets.image`EnemyInactiveSeeker`)
-        }
-        
-        if (!screenFlash && playerOne.overlapsWith(seeker)) {
-            seeker.startEffect(effects.fire, 100)
-            sprites.destroy(seeker)
-            info.changeLifeBy(-1)
-            screenFlash = true
-            screenFlashTimer.reset()
-        }
-        
     }
 }
 
@@ -238,6 +222,7 @@ function updateEnemy() {
     let setImage: boolean;
     let isAgro: any;
     
+    let enemyHealth = sprites.readDataNumber(enemyOne, "health")
     info.setScore(enemyHealth)
     if (!intro) {
         if (enemyStage == 0) {
@@ -430,6 +415,7 @@ function updateEnemy() {
             enemyHealth = 25
         }
         
+        sprites.setDataNumber(enemyOne, "health", enemyHealth)
         if (enemyStage >= 2) {
             sprites.destroy(enemyOne)
             spawnEnemy()
@@ -595,13 +581,13 @@ function updateEnemyGroup() {
     let tPosX: number;
     let tPosY: number;
     
-    if (sprites.allOfKind(SpriteKind.EnemySpaceShip).length <= 0) {
+    if (sprites.allOfKind(SpriteKind.Enemy).length <= 0) {
         startBigBoss()
         enemyStage += 1
         return
     }
     
-    for (let enemy of sprites.allOfKind(SpriteKind.EnemySpaceShip)) {
+    for (let enemy of sprites.allOfKind(SpriteKind.Enemy)) {
         waypointPos = [sprites.readDataNumber(enemy, "waypointX"), sprites.readDataNumber(enemy, "waypointY")]
         waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
         playerDist = calcDist(enemy.x, enemy.y, playerOne.x, playerOne.y)
@@ -697,7 +683,7 @@ function updateEnemyGroup() {
 
 function spawnEnemy() {
     
-    let tempEnemy = sprites.create(assets.image`Space Ship`, SpriteKind.EnemySpaceShip)
+    let tempEnemy = sprites.create(assets.image`Space Ship`, SpriteKind.Enemy)
     // Position
     let randomX = randint(20, 140)
     let randomY = randint(0, 20)
@@ -728,7 +714,7 @@ function startScrollingBG() {
 function startBigBoss() {
     
     // BigBoss
-    bigBoss = sprites.create(assets.image`BigBoss`)
+    bigBoss = sprites.create(assets.image`BigBoss`, SpriteKind.Enemy)
     bigBoss.setScale(2.0)
     bigBoss.setPosition(80, -bigBoss.height * 2)
     bigBoss.setPosition(80, 60)
@@ -798,7 +784,6 @@ let bigBoss : Sprite = null
 let moveSpeed = 0
 let screenFlash = false
 let playerOne : Sprite = null
-let enemyHealth = 30
 let enemyOne : Sprite = null
 let waypoint = [80, 15]
 let fireDelay = new msDelay()
@@ -825,9 +810,12 @@ let score = 0
 let bgVSpeed = 50
 let debug = true
 if (debug) {
-    enemyHealth = 1
+    sprites.setDataNumber(enemyOne, "health", 1)
+} else {
+    sprites.setDataNumber(enemyOne, "health", 30)
 }
 
+//  enemyHealth = 30 OLD Code
 // spawnEnemy()
 // spawnEnemy()
 // enemyStage = 2

@@ -960,7 +960,8 @@ f f f f f f f f f f f f f f f f
 
     helpers._registerFactory("song", function(name: string) {
         switch(helpers.stringTrim(name)) {
-
+            case "song1":
+            case "mySong":return hex`00780004080200`;
         }
         return null;
     })

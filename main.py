@@ -22,7 +22,7 @@ class msDelay():
         self.counter = game.runtime()
 
 def collision():#TODO this will need a clean up.
-    global screenFlash, enemyHealth, score
+    global screenFlash, score
     if not screenFlash:
         for value in sprites.all_of_kind(SpriteKind.EnemyProjectile):
             dist = Math.round(calcDist(value.x, value.y, playerOne.x, playerOne.y))
@@ -35,81 +35,71 @@ def collision():#TODO this will need a clean up.
                 screenFlash = True
                 screenFlashTimer.reset()
                 break
+        # Heat Seeking Bullets
+        for seeker in sprites.all_of_kind(SpriteKind.EnemyHeatSeeker):
+                lifeTimer = sprites.read_data_number(seeker, "lifeTimer")
 
-    if enemyStage < 2:
-        for value1 in sprites.all_of_kind(SpriteKind.projectile):
-            dist = calcDist(value1.x, value1.y, enemyOne.x, enemyOne.y)
+                if lifeTimer <= 30:
+                    speed = sprites.read_data_number(seeker, "speed")
+                    angle = ( calcAngle(seeker.x - (seeker.width / 2), seeker.y - (seeker.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
+                    velX = Math.sin(angle) * speed
+                    velY = Math.cos(angle) * speed
+                    seeker.set_velocity(velX, velY)
+                    sprites.set_data_number(seeker, "lifeTimer", lifeTimer + 1)
+                else:
+                    seeker.set_image(assets.image("EnemyInactiveSeeker"))
+
+                if playerOne.overlaps_with(seeker):
+                        seeker.start_effect(effects.fire, 100)
+                        sprites.destroy(seeker)
+                        info.change_life_by(-1)
+                        screenFlash = True
+                        screenFlashTimer.reset()
+                        break
+        #Laser Segments
+        for laserSeg in sprites.all_of_kind(SpriteKind.EnemyProjLaser):
+            lifeTimer = sprites.read_data_number(laserSeg, "lifeTimer")
+            sprites.set_data_number(laserSeg, "lifeTimer", lifeTimer + 1)
+
+            if lifeTimer >= 40:
+                sprites.set_data_boolean(laserSeg, "charged", True)
+                laserSeg.set_image(assets.image("""LaserSegment"""))
+
+                if lifeTimer >= 60:
+                    if Math.percent_chance(22):
+                        laserSeg.start_effect(effects.fire, 100)
+                    sprites.destroy(laserSeg)
+
+                if playerOne.overlaps_with(laserSeg):
+                    laserSeg.start_effect(effects.fire, 100)
+                    sprites.destroy(laserSeg)
+                    info.change_life_by(-1)
+                    screenFlash = True
+                    screenFlashTimer.reset()
+                    break
+
+        for value2 in sprites.all_of_kind(SpriteKind.EnemyProjFlak):
+            dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
+            if dist >= 25:
+                continue
+            else:
+                value2.start_effect(effects.fire, 100)
+                sprites.destroy(value2)
+                shootBullets(value2.x, value2.y, 15, 5, 0, 0, 6)
+                break
+
+    #Cleaned up - Projectile Collision Detection
+    for value3 in sprites.all_of_kind(SpriteKind.projectile):
+        for enemy in sprites.all_of_kind(SpriteKind.enemy):
+            dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
             if dist >= 10:
                 continue
-            if enemyOne.overlaps_with(value1):
-                value1.start_effect(effects.fire, 100)
-                sprites.destroy(value1)
-                enemyHealth += 0 - 1
+            if enemy.overlaps_with(value3):
+                value3.start_effect(effects.fire, 100)
+                sprites.destroy(value3)
+                sprites.change_data_number_by(enemy, "health", -1)
                 score += 100
-    else:
-        for value3 in sprites.all_of_kind(SpriteKind.projectile):
-            for enemy in sprites.all_of_kind(SpriteKind.EnemySpaceShip):
-                dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
-                if dist >= 10:
-                    continue
-                if enemy.overlaps_with(value3):
-                    value3.start_effect(effects.fire, 100)
-                    sprites.destroy(value3)
-                    sprites.change_data_number_by(enemy, "health", -1)
-                    if sprites.read_data_number(enemy, "Health") <= 0:
-                        sprites.destroy(enemy)
-                    score += 100  
-
-    for value2 in sprites.all_of_kind(SpriteKind.EnemyProjFlak):
-        dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
-        if dist >= 25:
-            continue
-        else:
-            value2.start_effect(effects.fire, 100)
-            sprites.destroy(value2)
-            shootBullets(value2.x, value2.y, 15, 5, 0, 0, 6)
-
-    for laserSeg in sprites.all_of_kind(SpriteKind.EnemyProjLaser):
-        lifeTimer = sprites.read_data_number(laserSeg, "lifeTimer")
-        sprites.set_data_number(laserSeg, "lifeTimer", lifeTimer + 1)
-
-        if lifeTimer >= 40:
-            sprites.set_data_boolean(laserSeg, "charged", True)
-            laserSeg.set_image(assets.image("""LaserSegment"""))                    
-
-            if lifeTimer >= 60:
-                if Math.percent_chance(22):
-                    laserSeg.start_effect(effects.fire, 100)
-                sprites.destroy(laserSeg)
-
-            if not screenFlash and playerOne.overlaps_with(laserSeg):
-                laserSeg.start_effect(effects.fire, 100)
-                sprites.destroy(laserSeg)
-                info.change_life_by(-1)
-                screenFlash = True
-                screenFlashTimer.reset()
-
-    for seeker in sprites.all_of_kind(SpriteKind.EnemyHeatSeeker):
-        lifeTimer = sprites.read_data_number(seeker, "lifeTimer")
-
-        if lifeTimer <= 30:
-            speed = sprites.read_data_number(seeker, "speed")
-            angle = ( calcAngle(seeker.x - (seeker.width / 2), seeker.y - (seeker.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
-            velX = Math.sin(angle) * speed
-            velY = Math.cos(angle) * speed
-            seeker.set_velocity(velX, velY)
-            sprites.set_data_number(seeker, "lifeTimer", lifeTimer + 1)
-        else:
-            seeker.set_image(assets.image("EnemyInactiveSeeker"))
-
-        if not screenFlash and playerOne.overlaps_with(seeker):
-                seeker.start_effect(effects.fire, 100)
-                sprites.destroy(seeker)
-                info.change_life_by(-1)
-                screenFlash = True
-                screenFlashTimer.reset()
     
-
 def updatePlayer():
     global moveSpeed, fireType, fireDelay, screenFlash, screenFlashTimer, bgVSpeed
     isBPressed = controller.B.is_pressed()
@@ -153,7 +143,8 @@ def updatePlayer():
             screenFlash = False
 
 def updateEnemy():
-    global waypoint, enemyStage, enemyOne, fireType, enemyHealth, enemyNormalImage, intro, score
+    global waypoint, enemyStage, enemyOne, fireType, enemyNormalImage, intro, score
+    enemyHealth = sprites.read_data_number(enemyOne, "health")
     info.set_score(enemyHealth)
     if not intro:
         if enemyStage == 0:#Stage 1
@@ -292,6 +283,8 @@ def updateEnemy():
             enemyHealth = 1#25
         else:
             enemyHealth = 25
+        sprites.set_data_number(enemyOne, "health", enemyHealth)
+
         if enemyStage >= 2:
             sprites.destroy(enemyOne)
             spawnEnemy()
@@ -409,12 +402,12 @@ def toRadians(degrees):
 
 def updateEnemyGroup():
     global enemyStage
-    if len(sprites.all_of_kind(SpriteKind.EnemySpaceShip))<= 0:
+    if len(sprites.all_of_kind(SpriteKind.enemy))<= 0:
         startBigBoss()
         enemyStage += 1
         return
 
-    for enemy in sprites.all_of_kind(SpriteKind.EnemySpaceShip):
+    for enemy in sprites.all_of_kind(SpriteKind.enemy):
         waypointPos = (
             sprites.read_data_number(enemy, "waypointX"),
             sprites.read_data_number(enemy, "waypointY")
@@ -493,7 +486,7 @@ def updateEnemyGroup():
 
 def spawnEnemy():
     global debug
-    tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.EnemySpaceShip)
+    tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.enemy)
 
     #Position
     randomX = randint(20, 140)
@@ -524,7 +517,7 @@ def startScrollingBG():
 def startBigBoss():
     global bigBoss
     #BigBoss
-    bigBoss = sprites.create(assets.image("""BigBoss"""),)
+    bigBoss = sprites.create(assets.image("""BigBoss"""), SpriteKind.enemy)
     bigBoss.set_scale(2.0)
     bigBoss.set_position(80, (-bigBoss.height * 2))
 
@@ -589,7 +582,6 @@ bigBoss: Sprite = None
 moveSpeed = 0
 screenFlash = False
 playerOne: Sprite = None
-enemyHealth = 30
 enemyOne: Sprite = None
 waypoint: any = (80, 15)
 fireDelay = msDelay()
@@ -618,7 +610,9 @@ bgVSpeed = 50
 debug = True
 
 if debug:
-    enemyHealth = 1
+    sprites.set_data_number(enemyOne, "health", 1)
+else:
+    sprites.set_data_number(enemyOne, "health", 30) # enemyHealth = 30 OLD Code
 
 #spawnEnemy()
 #spawnEnemy()
