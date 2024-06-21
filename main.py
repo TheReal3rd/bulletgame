@@ -102,12 +102,14 @@ def collision():#TODO this will need a clean up.
     
 def updatePlayer():
     global moveSpeed, fireType, fireDelay, screenFlash, screenFlashTimer, bgVSpeed
+    #Player Movement speed.
     isBPressed = controller.B.is_pressed()
     if isBPressed:
         moveSpeed = 0.5
     else:
         moveSpeed = 2
 
+    #Directional Movement.
     noMove = True
     if controller.down.is_pressed():
         playerOne.y += moveSpeed
@@ -124,9 +126,11 @@ def updatePlayer():
         scroller.scroll_background_with_speed(10, bgVSpeed)
         noMove = False
 
+    #Scrolling background pausing.
     if noMove:
         scroller.scroll_background_with_speed(0, bgVSpeed)
 
+    #Player Shooting code
     if controller.A.is_pressed():
         delay = 500
         if isBPressed:
@@ -135,6 +139,7 @@ def updatePlayer():
             projectile2 = sprites.create_projectile_from_sprite(assets.image("""PlayerBullet"""), playerOne, 0, -50)
             fireDelay.reset()
 
+    #When damaged flashes screen and shakes camera
     if screenFlash:
         scene.set_background_image(assets.image("""BackgroundLayer2"""))
         scene.camera_shake(2, 400)
@@ -532,14 +537,26 @@ def startBigBoss():
 
 def updateBigBoss():
     global bigBoss
+    health = sprites.read_data_number(bigBoss, "health")
+    if health <= 0:
+        sprites.destroy(bigBoss)
+        return
+
     waypoint = ( sprites.read_data_number(bigBoss, "waypointX"), sprites.read_data_number(bigBoss, "waypointY") )
     waypointDist = calcDist(bigBoss.x, bigBoss.y, waypoint[0], waypoint[1])
 
     # Shooting Code
     shootDelay = sprites.read_data_number(bigBoss, "shootDelay")
     if shootDelay <= 0:
-        shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
-        shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+        randomSlot = randint(0, 4)
+        if randomSlot == 0:
+            shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+            shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+        elif randomSlot == 1:
+            pass
+
+
+ 
         sprites.set_data_number(bigBoss, "shootDelay", 40)
     else:
         sprites.set_data_number(bigBoss, "shootDelay",  shootDelay - 1)
@@ -606,6 +623,19 @@ fireType = 0
 #isAgro = False
 score = 0
 bgVSpeed = 50
+playersClass = 0
+hasStarted = False
+inputDelay = msDelay()
+
+def nextClass():
+    global playersClass
+    playersClass += 1
+
+def prevClass():
+    global playersClass
+    playersClass -= 1
+
+
 
 debug = True
 
@@ -622,12 +652,22 @@ else:
 startScrollingBG()
 def on_forever():
     game.stats = True
-    collision()
-    updatePlayer()
-    if enemyStage == 0 or enemyStage == 1:
-        updateEnemy()
-    if enemyStage == 2: 
-        updateEnemyGroup()
-    if enemyStage == 3:
-        updateBigBoss()
+    if hasStarted == True:
+        collision()
+        updatePlayer()
+        if enemyStage == 0 or enemyStage == 1:
+            updateEnemy()
+        if enemyStage == 2: 
+            updateEnemyGroup()
+        if enemyStage == 3:
+            updateBigBoss()
+    else:
+        if inputDelay.passed(300):
+            if controller.left.is_pressed():
+                nextClass()
+            elif controller.right.is_pressed():
+                prevClass()
+
+        info.set_score(playersClass)
+
 forever(on_forever)

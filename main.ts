@@ -157,6 +157,7 @@ function updatePlayer() {
     let delay: number;
     let projectile2: Sprite;
     
+    // Player Movement speed.
     let isBPressed = controller.B.isPressed()
     if (isBPressed) {
         moveSpeed = 0.5
@@ -164,6 +165,7 @@ function updatePlayer() {
         moveSpeed = 2
     }
     
+    // Directional Movement.
     let noMove = true
     if (controller.down.isPressed()) {
         playerOne.y += moveSpeed
@@ -183,10 +185,12 @@ function updatePlayer() {
         noMove = false
     }
     
+    // Scrolling background pausing.
     if (noMove) {
         scroller.scrollBackgroundWithSpeed(0, bgVSpeed)
     }
     
+    // Player Shooting code
     if (controller.A.isPressed()) {
         delay = 500
         if (isBPressed) {
@@ -200,6 +204,7 @@ function updatePlayer() {
         
     }
     
+    // When damaged flashes screen and shakes camera
     if (screenFlash) {
         scene.setBackgroundImage(assets.image`BackgroundLayer2`)
         scene.cameraShake(2, 400)
@@ -726,17 +731,30 @@ function startBigBoss() {
 }
 
 function updateBigBoss() {
+    let randomSlot: number;
     let goodPos: boolean;
     let randomX: number;
     let randomY: number;
+    
+    let health = sprites.readDataNumber(bigBoss, "health")
+    if (health <= 0) {
+        sprites.destroy(bigBoss)
+        return
+    }
     
     let waypoint = [sprites.readDataNumber(bigBoss, "waypointX"), sprites.readDataNumber(bigBoss, "waypointY")]
     let waypointDist = calcDist(bigBoss.x, bigBoss.y, waypoint[0], waypoint[1])
     //  Shooting Code
     let shootDelay = sprites.readDataNumber(bigBoss, "shootDelay")
     if (shootDelay <= 0) {
-        shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
-        shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+        randomSlot = randint(0, 4)
+        if (randomSlot == 0) {
+            shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+            shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
+        } else if (randomSlot == 1) {
+            
+        }
+        
         sprites.setDataNumber(bigBoss, "shootDelay", 40)
     } else {
         sprites.setDataNumber(bigBoss, "shootDelay", shootDelay - 1)
@@ -808,6 +826,19 @@ let fireType = 0
 // isAgro = False
 let score = 0
 let bgVSpeed = 50
+let playersClass = 0
+let hasStarted = false
+let inputDelay = new msDelay()
+function nextClass() {
+    
+    playersClass += 1
+}
+
+function prevClass() {
+    
+    playersClass -= 1
+}
+
 let debug = true
 if (debug) {
     sprites.setDataNumber(enemyOne, "health", 1)
@@ -822,18 +853,32 @@ if (debug) {
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true
-    collision()
-    updatePlayer()
-    if (enemyStage == 0 || enemyStage == 1) {
-        updateEnemy()
-    }
-    
-    if (enemyStage == 2) {
-        updateEnemyGroup()
-    }
-    
-    if (enemyStage == 3) {
-        updateBigBoss()
+    if (hasStarted == true) {
+        collision()
+        updatePlayer()
+        if (enemyStage == 0 || enemyStage == 1) {
+            updateEnemy()
+        }
+        
+        if (enemyStage == 2) {
+            updateEnemyGroup()
+        }
+        
+        if (enemyStage == 3) {
+            updateBigBoss()
+        }
+        
+    } else {
+        if (inputDelay.passed(300)) {
+            if (controller.left.isPressed()) {
+                nextClass()
+            } else if (controller.right.isPressed()) {
+                prevClass()
+            }
+            
+        }
+        
+        info.setScore(playersClass)
     }
     
 })
