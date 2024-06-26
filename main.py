@@ -624,7 +624,7 @@ fireType = 0
 score = 0
 bgVSpeed = 50
 playersClass = 0
-hasStarted = False
+hasStarted = True#False
 inputDelay = msDelay()
 
 def nextClass():
@@ -637,7 +637,7 @@ def prevClass():
 
 
 
-debug = True
+debug = False
 
 if debug:
     sprites.set_data_number(enemyOne, "health", 1)

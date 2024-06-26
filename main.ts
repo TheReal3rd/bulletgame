@@ -827,7 +827,8 @@ let fireType = 0
 let score = 0
 let bgVSpeed = 50
 let playersClass = 0
-let hasStarted = false
+let hasStarted = true
+// False
 let inputDelay = new msDelay()
 function nextClass() {
     
@@ -839,7 +840,7 @@ function prevClass() {
     playersClass -= 1
 }
 
-let debug = true
+let debug = false
 if (debug) {
     sprites.setDataNumber(enemyOne, "health", 1)
 } else {
