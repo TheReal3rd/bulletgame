@@ -6,6 +6,7 @@ namespace SpriteKind {
     export const EnemySpaceShip = SpriteKind.create()
 }
 
+// Standard Milliseconde delay tracker.
 class msDelay {
     static counter: number
     private ___counter_is_set: boolean
@@ -53,6 +54,7 @@ function collision() {
     // TODO this will need a clean up.
     
     if (!screenFlash) {
+        // Normal Bullet code.
         for (let value of sprites.allOfKind(SpriteKind.EnemyProjectile)) {
             dist = Math.round(calcDist(value.x, value.y, playerOne.x, playerOne.y))
             if (dist >= 10) {
@@ -72,7 +74,7 @@ function collision() {
         //  Heat Seeking Bullets
         for (let seeker of sprites.allOfKind(SpriteKind.EnemyHeatSeeker)) {
             lifeTimer = sprites.readDataNumber(seeker, "lifeTimer")
-            if (lifeTimer <= 30) {
+            if (lifeTimer <= 50) {
                 speed = sprites.readDataNumber(seeker, "speed")
                 angle = calcAngle(seeker.x - seeker.width / 2, seeker.y - seeker.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) * 0.017453292519943295
                 velX = Math.sin(angle) * speed
@@ -120,6 +122,7 @@ function collision() {
             }
             
         }
+        // Flak Bullets
         for (let value2 of sprites.allOfKind(SpriteKind.EnemyProjFlak)) {
             dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
             if (dist >= 25) {
@@ -217,6 +220,7 @@ function updatePlayer() {
     
 }
 
+// Updates the Skeletion Enemy for phase 1 and 2
 function updateEnemy() {
     let numBullets: number;
     let angle: number;
@@ -431,6 +435,7 @@ function updateEnemy() {
     
 }
 
+// Finishes the game and displays the players score.
 function endGame() {
     // Final stage is beaten send win screen.
     info.setScore(score)
@@ -438,12 +443,14 @@ function endGame() {
     game.gameOver(true)
 }
 
+// Calculates the Distance between one position to another.
 function calcDist(posX: number, posY: number, posX1: number, posY1: number): number {
     let xDiff = posX - posX1
     let yDiff = posY - posY1
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
 }
 
+// Calculates the angle from one position to another.
 function calcAngle(posX: number, posY: number, posX1: number, posY1: number): number {
     let xDiff = posX - posX1
     let yDiff = posY - posY1
@@ -451,6 +458,7 @@ function calcAngle(posX: number, posY: number, posX1: number, posY1: number): nu
 }
 
 //  -180
+// Wraps the given degrees within 0 to 360 when given -160 to 160 range.
 function wrapDegrees(degrees: number): number {
     let d = degrees % 360.0
     if (d >= 180.0) {
@@ -464,8 +472,14 @@ function wrapDegrees(degrees: number): number {
     return d
 }
 
+// Radians to degrees.
 function toDegrees(rot: number): number {
     return rot * 57.29577951308232
+}
+
+// Converts degrees to radians
+function toRadians(degrees: number): number {
+    return degrees * Math.PI / 180
 }
 
 //  Event listener for when the players health reaches 0 if so show lose screen.
@@ -475,6 +489,7 @@ info.onLifeZero(function on_life_zero() {
     game.setGameOverMessage(true, "GAME OVER! YOU LOSE!")
     game.gameOver(true)
 })
+// Customisable shoot bullet function.
 function shootBullets(posX: number, posY: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number) {
     let angle2: number;
     let oPosX: number;
@@ -568,10 +583,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
     
 }
 
-function toRadians(degrees: number): number {
-    return degrees * Math.PI / 180
-}
-
+// Updates the Ship Enemy Group.
 function updateEnemyGroup() {
     let waypointPos: number[];
     let waypointDist: number;
@@ -592,6 +604,7 @@ function updateEnemyGroup() {
         return
     }
     
+    let totalHealth = 0
     for (let enemy of sprites.allOfKind(SpriteKind.Enemy)) {
         waypointPos = [sprites.readDataNumber(enemy, "waypointX"), sprites.readDataNumber(enemy, "waypointY")]
         waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
@@ -599,6 +612,7 @@ function updateEnemyGroup() {
         enemyShootDelay = sprites.readDataNumber(enemy, "shootDelay")
         enemyMoveDelay = sprites.readDataNumber(enemy, "moveDelay")
         shootToggle = sprites.readDataBoolean(enemy, "shootToggle")
+        totalHealth += sprites.readDataNumber(enemy, "health")
         if (sprites.readDataNumber(enemy, "health") <= 0) {
             sprites.destroy(enemy)
             continue
@@ -684,8 +698,10 @@ function updateEnemyGroup() {
         }
         
     }
+    info.setScore(totalHealth)
 }
 
+// Spawn the enemy space ships.
 function spawnEnemy() {
     
     let tempEnemy = sprites.create(assets.image`Space Ship`, SpriteKind.Enemy)
@@ -710,12 +726,14 @@ function spawnEnemy() {
     sprites.setDataBoolean(tempEnemy, "anim", true)
 }
 
+// Starts the scrolling background.
 function startScrollingBG() {
     
     scene.setBackgroundImage(assets.image`BackgroundLayer1`)
     scroller.scrollBackgroundWithSpeed(0, bgVSpeed)
 }
 
+// Creates and spawns the big boss.
 function startBigBoss() {
     
     // BigBoss
@@ -730,6 +748,7 @@ function startBigBoss() {
     sprites.setDataNumber(bigBoss, "waypointY", 60)
 }
 
+// Updates the bigboss executing his movement and shooting.
 function updateBigBoss() {
     let randomSlot: number;
     let goodPos: boolean;
@@ -737,6 +756,7 @@ function updateBigBoss() {
     let randomY: number;
     
     let health = sprites.readDataNumber(bigBoss, "health")
+    info.setScore(health)
     if (health <= 0) {
         sprites.destroy(bigBoss)
         return
@@ -840,7 +860,7 @@ function prevClass() {
     playersClass -= 1
 }
 
-let debug = false
+let debug = true
 if (debug) {
     sprites.setDataNumber(enemyOne, "health", 1)
 } else {

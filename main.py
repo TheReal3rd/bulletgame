@@ -6,6 +6,7 @@ class SpriteKind:
     EnemyHeatSeeker = SpriteKind.create()
     EnemySpaceShip = SpriteKind.create()
 
+#Standard Milliseconde delay tracker.
 class msDelay():
     counter = None
 
@@ -24,6 +25,7 @@ class msDelay():
 def collision():#TODO this will need a clean up.
     global screenFlash, score
     if not screenFlash:
+        #Normal Bullet code.
         for value in sprites.all_of_kind(SpriteKind.EnemyProjectile):
             dist = Math.round(calcDist(value.x, value.y, playerOne.x, playerOne.y))
             if dist >= 10:
@@ -39,7 +41,7 @@ def collision():#TODO this will need a clean up.
         for seeker in sprites.all_of_kind(SpriteKind.EnemyHeatSeeker):
                 lifeTimer = sprites.read_data_number(seeker, "lifeTimer")
 
-                if lifeTimer <= 30:
+                if lifeTimer <= 50:
                     speed = sprites.read_data_number(seeker, "speed")
                     angle = ( calcAngle(seeker.x - (seeker.width / 2), seeker.y - (seeker.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
                     velX = Math.sin(angle) * speed
@@ -77,7 +79,7 @@ def collision():#TODO this will need a clean up.
                     screenFlash = True
                     screenFlashTimer.reset()
                     break
-
+        #Flak Bullets
         for value2 in sprites.all_of_kind(SpriteKind.EnemyProjFlak):
             dist = calcDist(value2.x, value2.y, playerOne.x, playerOne.y)
             if dist >= 25:
@@ -147,6 +149,7 @@ def updatePlayer():
             scene.set_background_image(assets.image("""BackgroundLayer1"""))
             screenFlash = False
 
+#Updates the Skeletion Enemy for phase 1 and 2
 def updateEnemy():
     global waypoint, enemyStage, enemyOne, fireType, enemyNormalImage, intro, score
     enemyHealth = sprites.read_data_number(enemyOne, "health")
@@ -295,23 +298,26 @@ def updateEnemy():
             spawnEnemy()
             spawnEnemy()
 
-
+#Finishes the game and displays the players score.
 def endGame():
     #Final stage is beaten send win screen.
     info.set_score(score)
     game.set_game_over_message(True, "GAMEOVER! YOU WIN!")
     game.game_over(True)
 
+#Calculates the Distance between one position to another.
 def calcDist(posX: number, posY: number, posX1: number, posY1: number):
     xDiff = posX - posX1
     yDiff = posY - posY1
     return Math.sqrt(xDiff * xDiff + yDiff * yDiff)
 
+#Calculates the angle from one position to another.
 def calcAngle(posX: number, posY: number, posX1: number, posY1: number):
     xDiff = posX - posX1
     yDiff = posY - posY1
     return wrapDegrees(toDegrees(Math.atan2(xDiff, yDiff)) - 180) # -180
 
+#Wraps the given degrees within 0 to 360 when given -160 to 160 range.
 def wrapDegrees(degrees):
     d = degrees % 360.0;
     if (d >= 180.0):
@@ -320,8 +326,13 @@ def wrapDegrees(degrees):
         d += 360.0;
     return d;
 
+#Radians to degrees.
 def toDegrees(rot):
     return rot * 57.29577951308232
+
+#Converts degrees to radians
+def toRadians(degrees):
+    return degrees * Math.PI / 180
 
 # Event listener for when the players health reaches 0 if so show lose screen.
 def on_life_zero():
@@ -331,6 +342,7 @@ def on_life_zero():
     game.game_over(True)
 info.on_life_zero(on_life_zero)
 
+#Customisable shoot bullet function.
 def shootBullets(posX: number, posY: number, speed: number, distance: number, angleOffset: number, typeBullet: number, numBullets: number):
     #TODO Create limits for the shoot types. and defaults
     if typeBullet == 0:
@@ -401,10 +413,7 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
         velY = Math.cos(angle) * speed
         enProj.set_velocity(velX, velY)
 
-
-def toRadians(degrees):
-    return degrees * Math.PI / 180
-
+#Updates the Ship Enemy Group.
 def updateEnemyGroup():
     global enemyStage
     if len(sprites.all_of_kind(SpriteKind.enemy))<= 0:
@@ -412,6 +421,7 @@ def updateEnemyGroup():
         enemyStage += 1
         return
 
+    totalHealth = 0
     for enemy in sprites.all_of_kind(SpriteKind.enemy):
         waypointPos = (
             sprites.read_data_number(enemy, "waypointX"),
@@ -423,6 +433,8 @@ def updateEnemyGroup():
         enemyMoveDelay = sprites.read_data_number(enemy, "moveDelay")
         shootToggle = sprites.read_data_boolean(enemy, "shootToggle")
     
+        totalHealth += sprites.read_data_number(enemy, "health")
+
         if sprites.read_data_number(enemy, "health") <= 0:
             sprites.destroy(enemy)
             continue
@@ -489,6 +501,9 @@ def updateEnemyGroup():
             elif waypointPos[1] > enemy.y:
                 enemy.y += 2
 
+    info.set_score(totalHealth)
+
+#Spawn the enemy space ships.
 def spawnEnemy():
     global debug
     tempEnemy = sprites.create(assets.image("""Space Ship"""), SpriteKind.enemy)
@@ -514,11 +529,13 @@ def spawnEnemy():
     #Spawn animation
     sprites.set_data_boolean(tempEnemy, "anim", True)
 
+#Starts the scrolling background.
 def startScrollingBG():
     global bgVSpeed
     scene.set_background_image(assets.image("""BackgroundLayer1"""))
     scroller.scroll_background_with_speed(0, bgVSpeed)
 
+#Creates and spawns the big boss.
 def startBigBoss():
     global bigBoss
     #BigBoss
@@ -534,10 +551,11 @@ def startBigBoss():
     sprites.set_data_number(bigBoss, "waypointX", 80)
     sprites.set_data_number(bigBoss, "waypointY", 60)
 
-
+#Updates the bigboss executing his movement and shooting.
 def updateBigBoss():
     global bigBoss
     health = sprites.read_data_number(bigBoss, "health")
+    info.set_score(health)
     if health <= 0:
         sprites.destroy(bigBoss)
         return
@@ -555,8 +573,6 @@ def updateBigBoss():
         elif randomSlot == 1:
             pass
 
-
- 
         sprites.set_data_number(bigBoss, "shootDelay", 40)
     else:
         sprites.set_data_number(bigBoss, "shootDelay",  shootDelay - 1)
@@ -637,7 +653,7 @@ def prevClass():
 
 
 
-debug = False
+debug = True
 
 if debug:
     sprites.set_data_number(enemyOne, "health", 1)
