@@ -575,12 +575,12 @@ def updateBigBoss():
             shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
         elif randomSlot == 1:#Flake shot
             shootBullets(bigBoss.x, bigBoss.y, 100, 15, 0, 2, 0)
-        elif randomSlot == 2:#
-            shootBullets(bigBoss.x, bigBoss.y, 90, 30, 80, 0, 4)
-        elif randomSlot == 3:
-            shootBullets(bigBoss.x, bigBoss.y, 70, 30, 80, 1, 0)
-        elif randomSlot == 4:
-            shootBullets(bigBoss.x, bigBoss.y, 100, 0, 0, 4, 0)
+        elif randomSlot == 2:#Circle shot
+            shootBullets(bigBoss.x, bigBoss.y, 90, 10, 80, 0, 4)
+        elif randomSlot == 3:#Line
+            shootBullets(bigBoss.x, bigBoss.y, 70, 0, 80, 1, 0)
+        elif randomSlot == 4:#Heat Seeker
+            shootBullets(bigBoss.x, bigBoss.y, 80, 0, 0, 4, 0)
 
         sprites.set_data_number(bigBoss, "shootDelay", 25)
     else:

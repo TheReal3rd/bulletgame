@@ -782,12 +782,14 @@ function updateBigBoss() {
             // Flake shot
             shootBullets(bigBoss.x, bigBoss.y, 100, 15, 0, 2, 0)
         } else if (randomSlot == 2) {
-            // 
-            shootBullets(bigBoss.x, bigBoss.y, 90, 30, 80, 0, 4)
+            // Circle shot
+            shootBullets(bigBoss.x, bigBoss.y, 90, 10, 80, 0, 4)
         } else if (randomSlot == 3) {
-            shootBullets(bigBoss.x, bigBoss.y, 70, 30, 80, 1, 0)
+            // Line
+            shootBullets(bigBoss.x, bigBoss.y, 70, 0, 80, 1, 0)
         } else if (randomSlot == 4) {
-            shootBullets(bigBoss.x, bigBoss.y, 100, 0, 0, 4, 0)
+            // Heat Seeker
+            shootBullets(bigBoss.x, bigBoss.y, 80, 0, 0, 4, 0)
         }
         
         sprites.setDataNumber(bigBoss, "shootDelay", 25)
