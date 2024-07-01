@@ -360,7 +360,7 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
             angle2 += numBullets * 10
     elif typeBullet == 1:
         # Laser Line Shot
-        angle = ( calcAngle(enemyOne.x - (enemyOne.width / 2), enemyOne.y - (enemyOne.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
+        angle = ( calcAngle(posX, posY, playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
         for x in range(-numBullets, numBullets):
             enemyProjectile = sprites.create(assets.image("""LaserPixel"""),SpriteKind.EnemyProjectile)
             enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
@@ -376,7 +376,7 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
         enemyProjectile = sprites.create(assets.image("""EnemyFlak"""),SpriteKind.EnemyProjFlak)
         enemyProjectile.set_flag(SpriteFlag.AUTO_DESTROY, True)
         enemyProjectile.set_position(posX, posY)
-        angle = ( calcAngle(enemyOne.x - (enemyOne.width / 2), enemyOne.y - (enemyOne.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
+        angle = ( calcAngle(posX, posY, playerOne.x, playerOne.y) + angleOffset )  * 0.017453292519943295
         velX = Math.sin(angle) * speed
         velY = Math.cos(angle) * speed
         enemyProjectile.set_velocity(velX, velY)
@@ -408,7 +408,7 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
         enProj.set_position(posX, posY)
         sprites.set_data_number(enProj, "lifeTimer", 0)
         sprites.set_data_number(enProj, "speed", speed)
-        angle = ( calcAngle(enemyOne.x - (enemyOne.width / 2), enemyOne.y - (enemyOne.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
+        angle = ( calcAngle(posX, posY, playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
         velX = Math.sin(angle) * speed
         velY = Math.cos(angle) * speed
         enProj.set_velocity(velX, velY)
@@ -545,7 +545,10 @@ def startBigBoss():
 
     bigBoss.set_position(80, 60)
 
-    sprites.set_data_number(bigBoss, "health", 300)
+    if debug:
+        sprites.set_data_number(bigBoss, "health", 1)
+    else:
+        sprites.set_data_number(bigBoss, "health", 300)
     sprites.set_data_number(bigBoss, "bullletType", 0)
     sprites.set_data_number(bigBoss, "shootDelay", 40)
     sprites.set_data_number(bigBoss, "waypointX", 80)
@@ -566,11 +569,17 @@ def updateBigBoss():
     # Shooting Code
     shootDelay = sprites.read_data_number(bigBoss, "shootDelay")
     if shootDelay <= 0:
-        randomSlot = randint(0, 4)
-        if randomSlot == 0:
+        randomSlot = randint(0, 4)#Creates and random number between 0-4
+        if randomSlot == 0:# Lasers eyes
             shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
             shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
-        elif randomSlot == 1:
+        elif randomSlot == 1:#
+            shootBullets(bigBoss.x, bigBoss.y, 100, 15, 0, 2, 0) 
+        elif randomSlot == 2:
+            pass
+        elif randomSlot == 3:
+            pass
+        elif randomSlot == 4:
             pass
 
         sprites.set_data_number(bigBoss, "shootDelay", 40)

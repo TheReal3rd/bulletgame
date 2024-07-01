@@ -522,7 +522,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
         }
     } else if (typeBullet == 1) {
         //  Laser Line Shot
-        angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
+        angle = (calcAngle(posX, posY, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
         for (let x = -numBullets; x < numBullets; x++) {
             enemyProjectile = sprites.create(assets.image`LaserPixel`, SpriteKind.EnemyProjectile)
             enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
@@ -541,7 +541,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
         enemyProjectile = sprites.create(assets.image`EnemyFlak`, SpriteKind.EnemyProjFlak)
         enemyProjectile.setFlag(SpriteFlag.AutoDestroy, true)
         enemyProjectile.setPosition(posX, posY)
-        angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
+        angle = (calcAngle(posX, posY, playerOne.x, playerOne.y) + angleOffset) * 0.017453292519943295
         velX = Math.sin(angle) * speed
         velY = Math.cos(angle) * speed
         enemyProjectile.setVelocity(velX, velY)
@@ -575,7 +575,7 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
         enProj.setPosition(posX, posY)
         sprites.setDataNumber(enProj, "lifeTimer", 0)
         sprites.setDataNumber(enProj, "speed", speed)
-        angle = (calcAngle(enemyOne.x - enemyOne.width / 2, enemyOne.y - enemyOne.height / 2, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
+        angle = (calcAngle(posX, posY, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
         velX = Math.sin(angle) * speed
         velY = Math.cos(angle) * speed
         enProj.setVelocity(velX, velY)
@@ -741,7 +741,12 @@ function startBigBoss() {
     bigBoss.setScale(2.0)
     bigBoss.setPosition(80, -bigBoss.height * 2)
     bigBoss.setPosition(80, 60)
-    sprites.setDataNumber(bigBoss, "health", 300)
+    if (debug) {
+        sprites.setDataNumber(bigBoss, "health", 1)
+    } else {
+        sprites.setDataNumber(bigBoss, "health", 300)
+    }
+    
     sprites.setDataNumber(bigBoss, "bullletType", 0)
     sprites.setDataNumber(bigBoss, "shootDelay", 40)
     sprites.setDataNumber(bigBoss, "waypointX", 80)
@@ -768,10 +773,19 @@ function updateBigBoss() {
     let shootDelay = sprites.readDataNumber(bigBoss, "shootDelay")
     if (shootDelay <= 0) {
         randomSlot = randint(0, 4)
+        // Creates and random number between 0-4
         if (randomSlot == 0) {
+            //  Lasers eyes
             shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
             shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
         } else if (randomSlot == 1) {
+            // 
+            shootBullets(bigBoss.x, bigBoss.y, 100, 15, 0, 2, 0)
+        } else if (randomSlot == 2) {
+            
+        } else if (randomSlot == 3) {
+            
+        } else if (randomSlot == 4) {
             
         }
         
