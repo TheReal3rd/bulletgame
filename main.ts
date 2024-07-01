@@ -779,17 +779,18 @@ function updateBigBoss() {
             shootBullets(bigBoss.x - 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
             shootBullets(bigBoss.x + 8, bigBoss.y - 8, 200, 100, 0, 3, 0)
         } else if (randomSlot == 1) {
-            // 
+            // Flake shot
             shootBullets(bigBoss.x, bigBoss.y, 100, 15, 0, 2, 0)
         } else if (randomSlot == 2) {
-            
+            // 
+            shootBullets(bigBoss.x, bigBoss.y, 90, 30, 80, 0, 4)
         } else if (randomSlot == 3) {
-            
+            shootBullets(bigBoss.x, bigBoss.y, 70, 30, 80, 1, 0)
         } else if (randomSlot == 4) {
-            
+            shootBullets(bigBoss.x, bigBoss.y, 70, 30, 80, 4, 0)
         }
         
-        sprites.setDataNumber(bigBoss, "shootDelay", 40)
+        sprites.setDataNumber(bigBoss, "shootDelay", 25)
     } else {
         sprites.setDataNumber(bigBoss, "shootDelay", shootDelay - 1)
     }
