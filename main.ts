@@ -748,7 +748,7 @@ function startBigBoss() {
     }
     
     sprites.setDataNumber(bigBoss, "bullletType", 0)
-    sprites.setDataNumber(bigBoss, "shootDelay", 40)
+    sprites.setDataNumber(bigBoss, "shootDelay", 25)
     sprites.setDataNumber(bigBoss, "waypointX", 80)
     sprites.setDataNumber(bigBoss, "waypointY", 60)
 }
@@ -787,7 +787,7 @@ function updateBigBoss() {
         } else if (randomSlot == 3) {
             shootBullets(bigBoss.x, bigBoss.y, 70, 30, 80, 1, 0)
         } else if (randomSlot == 4) {
-            shootBullets(bigBoss.x, bigBoss.y, 70, 30, 80, 4, 0)
+            shootBullets(bigBoss.x, bigBoss.y, 100, 0, 0, 4, 0)
         }
         
         sprites.setDataNumber(bigBoss, "shootDelay", 25)
@@ -885,7 +885,8 @@ if (debug) {
 //  enemyHealth = 30 OLD Code
 // spawnEnemy()
 // spawnEnemy()
-// enemyStage = 2
+enemyStage = 3
+startBigBoss()
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true

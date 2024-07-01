@@ -550,7 +550,7 @@ def startBigBoss():
     else:
         sprites.set_data_number(bigBoss, "health", 300)
     sprites.set_data_number(bigBoss, "bullletType", 0)
-    sprites.set_data_number(bigBoss, "shootDelay", 40)
+    sprites.set_data_number(bigBoss, "shootDelay", 25)
     sprites.set_data_number(bigBoss, "waypointX", 80)
     sprites.set_data_number(bigBoss, "waypointY", 60)
 
@@ -580,7 +580,7 @@ def updateBigBoss():
         elif randomSlot == 3:
             shootBullets(bigBoss.x, bigBoss.y, 70, 30, 80, 1, 0)
         elif randomSlot == 4:
-            shootBullets(bigBoss.x, bigBoss.y, 70, 30, 80, 4, 0)
+            shootBullets(bigBoss.x, bigBoss.y, 100, 0, 0, 4, 0)
 
         sprites.set_data_number(bigBoss, "shootDelay", 25)
     else:
@@ -672,7 +672,8 @@ else:
 #spawnEnemy()
 #spawnEnemy()
 
-#enemyStage = 2
+enemyStage = 3
+startBigBoss()
 
 startScrollingBG()
 def on_forever():
