@@ -89,11 +89,6 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "BackgroundLayer3"
     },
-    "image19": {
-        "data": "hwQQABAAAAD/////////////////T0T/T//////0//8vH/H///T//y8f8oj/9P/////////y//////////L/////////8v/////////y//////////L//0//////8v//Lx/xiP/y//8vH/L///L/////////LyL//////////////////////w==",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "BigBoss"
-    },
     "image21": {
         "data": "hwQEAAQAAAAgAgAA8i8AAPIvAAAgAgAA",
         "mimeType": "image/x-mkcd-f4",
@@ -114,11 +109,30 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "ButtonTemplate"
     },
-    "song1": {
-        "data": "00780004080200",
-        "mimeType": "application/mkcd-song",
-        "displayName": "mySong",
-        "namespace": "mySongs."
+    "image24": {
+        "data": "hwQQABAAAAD/////////////////T0T/T//////0//8vH/L///T//y8f8Yj/9P/////////y//////////L/////////8v/////////y//////////L//0//////8v//Lx/yiP/y//8vH/H///L/////////LyL//////////////////////w==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "BigBoss1"
+    },
+    "image25": {
+        "data": "hwQQABAAAAD/////////////////L/L/T//////y8v8vP/P///Ly/y8/84j/8vL////////y8v////////Ly////////8vL////////y8v////////Ly/0//////8vL/Lz/ziP/y8v8vP/P///Ly////////L/L//////////////////////w==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "BigBossHit"
+    },
+    "image19": {
+        "data": "hwQQABAAAAD/////////////////T0T/T//////0//8vH/H///T//y8f8oj/9P/////////y//////////L/////////8v/////////y//////////L//0//////8v//Lx/xiP/y//8vH/L///L/////////LyL//////////////////////w==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "BigBoss0"
+    },
+    "image26": {
+        "data": "hwQQABAAAAD/////////////////T0T/T//////0//8vH/H///T//y8v8Yj/9P/////////y//////////L/////////8v/////////y//////////L//0//////8v//Lx/xiP/y//8vL/H///L/////////LyL//////////////////////w==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "BigBoss2"
+    },
+    "image27": {
+        "data": "hwQQABAAAAD/////////////////T0T/T//////0//8vL/H///T//y8f8Yj/9P/////////y//////////L/////////8v/////////y//////////L//0//////8v//Ly/xiP/y//8vH/H///L/////////LyL//////////////////////w==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "BigBoss4"
     },
     "*": {
         "mimeType": "image/x-mkcd-f4",

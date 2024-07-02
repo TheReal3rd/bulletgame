@@ -737,7 +737,7 @@ function startScrollingBG() {
 function startBigBoss() {
     
     // BigBoss
-    bigBoss = sprites.create(assets.image`BigBoss`, SpriteKind.Enemy)
+    bigBoss = sprites.create(assets.image`BigBoss0`, SpriteKind.Enemy)
     bigBoss.setScale(2.0)
     bigBoss.setPosition(80, -bigBoss.height * 2)
     bigBoss.setPosition(80, 60)

@@ -539,7 +539,7 @@ def startScrollingBG():
 def startBigBoss():
     global bigBoss
     #BigBoss
-    bigBoss = sprites.create(assets.image("""BigBoss"""), SpriteKind.enemy)
+    bigBoss = sprites.create(assets.image("""BigBoss0"""), SpriteKind.enemy)
     bigBoss.set_scale(2.0)
     bigBoss.set_position(80, (-bigBoss.height * 2))
 

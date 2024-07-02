@@ -872,25 +872,6 @@ ffcffffffffffffffffffffffcffffffffffffffffcffffffffffffffffffffffcffffffffffffff
 ................................................................................................................................................................
 ................................................................................................................................................................
 `;
-            case "image19":
-            case "BigBoss":return img`
-f f f f f f f f f f f f f f f f 
-f f 4 2 2 f f f f f 4 2 2 f f f 
-f f f f f f f f f f f f f f f f 
-f f f 1 1 f f f f f f 1 1 f f f 
-f f f 1 2 f f f f f f 1 2 f f f 
-f f f f f f f f f f f f f f f f 
-f f f f 8 f f f f f f 8 f f f f 
-f f f f 8 f f f f f f 8 f f f f 
-f f f f f f f f f f f f f f f f 
-f f f f f f f f f f f f f f f f 
-f f 4 4 4 2 2 2 2 2 2 2 2 f f f 
-f 4 f f f f f f f f f f f 2 f f 
-f 4 f f f f f f f f f f f 2 f f 
-f 4 f f f f f f f f f f f 2 f f 
-f f f f f f f f f f f f f f f f 
-f f f f f f f f f f f f f f f f 
-`;
             case "image21":
             case "EnemyInactiveSeeker":return img`
 . 2 2 . 
@@ -947,6 +928,101 @@ f f f f f f f f f f f f f f f f
 . . . . . . . . . . . . . . . . . . . . 
 . . . . . . . . . . . . . . . . . . . . 
 `;
+            case "image24":
+            case "BigBoss1":return img`
+f f f f f f f f f f f f f f f f 
+f f 4 2 2 f f f f f 4 2 2 f f f 
+f f f f f f f f f f f f f f f f 
+f f f 1 1 f f f f f f 1 1 f f f 
+f f f 2 1 f f f f f f 2 1 f f f 
+f f f f f f f f f f f f f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+f f 4 4 4 2 2 2 2 2 2 2 2 f f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+`;
+            case "image25":
+            case "BigBossHit":return img`
+f f f f f f f f f f f f f f f f 
+f f 4 2 2 f f f f f 4 2 2 f f f 
+f f f f f f f f f f f f f f f f 
+f f f 3 3 f f f f f f 3 3 f f f 
+f f f 3 3 f f f f f f 3 3 f f f 
+f f f f f f f f f f f f f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+f f 2 2 2 2 2 2 2 2 2 2 2 f f f 
+f 2 f f f f f f f f f f f 2 f f 
+f 2 2 2 2 2 2 2 2 2 2 2 2 2 f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+`;
+            case "image19":
+            case "BigBoss0":return img`
+f f f f f f f f f f f f f f f f 
+f f 4 2 2 f f f f f 4 2 2 f f f 
+f f f f f f f f f f f f f f f f 
+f f f 1 1 f f f f f f 1 1 f f f 
+f f f 1 2 f f f f f f 1 2 f f f 
+f f f f f f f f f f f f f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+f f 4 4 4 2 2 2 2 2 2 2 2 f f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+`;
+            case "image26":
+            case "BigBoss2":return img`
+f f f f f f f f f f f f f f f f 
+f f 4 2 2 f f f f f 4 2 2 f f f 
+f f f f f f f f f f f f f f f f 
+f f f 1 2 f f f f f f 1 2 f f f 
+f f f 1 1 f f f f f f 1 1 f f f 
+f f f f f f f f f f f f f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+f f 4 4 4 2 2 2 2 2 2 2 2 f f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+`;
+            case "image27":
+            case "BigBoss4":return img`
+f f f f f f f f f f f f f f f f 
+f f 4 2 2 f f f f f 4 2 2 f f f 
+f f f f f f f f f f f f f f f f 
+f f f 2 1 f f f f f f 2 1 f f f 
+f f f 1 1 f f f f f f 1 1 f f f 
+f f f f f f f f f f f f f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f 8 f f f f f f 8 f f f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+f f 4 4 4 2 2 2 2 2 2 2 2 f f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f 4 f f f f f f f f f f f 2 f f 
+f f f f f f f f f f f f f f f f 
+f f f f f f f f f f f f f f f f 
+`;
         }
         return null;
     })
@@ -960,8 +1036,7 @@ f f f f f f f f f f f f f f f f
 
     helpers._registerFactory("song", function(name: string) {
         switch(helpers.stringTrim(name)) {
-            case "song1":
-            case "mySong":return hex`00780004080200`;
+
         }
         return null;
     })
