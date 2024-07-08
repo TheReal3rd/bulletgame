@@ -750,7 +750,8 @@ function startBigBoss() {
     sprites.setDataNumber(bigBoss, "bullletType", 0)
     sprites.setDataNumber(bigBoss, "shootDelay", 25)
     sprites.setDataNumber(bigBoss, "waypointX", 80)
-    sprites.setDataNumber(bigBoss, "waypointY", 60)
+    sprites.setDataNumber(bigBoss, "waypointY", -60)
+    sprites.setDataBoolean(bigBoss, "anim", false)
 }
 
 // Updates the bigboss executing his movement and shooting.
@@ -783,7 +784,7 @@ function updateBigBoss() {
             shootBullets(bigBoss.x, bigBoss.y, 100, 15, 0, 2, 0)
         } else if (randomSlot == 2) {
             // Circle shot
-            shootBullets(bigBoss.x, bigBoss.y, 90, 10, 80, 0, 4)
+            shootBullets(bigBoss.x, bigBoss.y, 60, 10, 80, 0, 4)
         } else if (randomSlot == 3) {
             // Line
             shootBullets(bigBoss.x, bigBoss.y, 70, 0, 80, 1, 0)
@@ -877,7 +878,7 @@ function prevClass() {
     playersClass -= 1
 }
 
-let debug = true
+let debug = false
 if (debug) {
     sprites.setDataNumber(enemyOne, "health", 1)
 } else {
@@ -887,8 +888,8 @@ if (debug) {
 //  enemyHealth = 30 OLD Code
 // spawnEnemy()
 // spawnEnemy()
-enemyStage = 3
-startBigBoss()
+// enemyStage = 3
+// startBigBoss()
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true
