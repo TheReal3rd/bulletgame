@@ -90,11 +90,15 @@ def collision():#TODO this will need a clean up.
                 shootBullets(value2.x, value2.y, 15, 5, 0, 0, 6)
                 break
 
+    #Player Bullet Code
     #Cleaned up - Projectile Collision Detection
     for value3 in sprites.all_of_kind(SpriteKind.projectile):
         for enemy in sprites.all_of_kind(SpriteKind.enemy):
             dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
-            if dist >= 10:
+            highest = enemy.width
+            if enemy.height > highest:
+                highest = enemy.height
+            if dist >= enemy.width:
                 continue
             if enemy.overlaps_with(value3):
                 value3.start_effect(effects.fire, 100)
@@ -416,13 +420,16 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
 #Updates the Ship Enemy Group.
 def updateEnemyGroup():
     global enemyStage
+    #End stage detect.
     if len(sprites.all_of_kind(SpriteKind.enemy))<= 0:
         startBigBoss()
         enemyStage += 1
+        info.change_life_by(3)
         return
 
     totalHealth = 0
     for enemy in sprites.all_of_kind(SpriteKind.enemy):
+        #Varible collection.
         waypointPos = (
             sprites.read_data_number(enemy, "waypointX"),
             sprites.read_data_number(enemy, "waypointY")
@@ -435,10 +442,12 @@ def updateEnemyGroup():
     
         totalHealth += sprites.read_data_number(enemy, "health")
 
+        #Death check
         if sprites.read_data_number(enemy, "health") <= 0:
             sprites.destroy(enemy)
             continue
 
+        #Shoot code
         if enemyShootDelay <= 0 and playerDist <= 90 and not playerDist <= 40:
             if shootToggle:
                 #Shoot laser here
@@ -459,6 +468,7 @@ def updateEnemyGroup():
         else:
             sprites.set_data_number(enemy, "shootDelay", enemyShootDelay - 1)
 
+        #Movement Code this code creates a movement position.
         if waypointDist <= 2.5:
             if enemyMoveDelay <= 0 or sprites.read_data_number(enemy, "anim"):
                 sprites.set_data_number(enemy, "moveDelay", 60)
@@ -490,7 +500,7 @@ def updateEnemyGroup():
                     sprites.set_data_number(enemy, "waypointY", tPosY)
             else:
                 sprites.set_data_number(enemy, "moveDelay", enemyMoveDelay - 1)
-        else:
+        else:#This code movement enemy to the position.
             if waypointPos[0] < enemy.x:
                 enemy.x -= 2
             elif waypointPos[0] > enemy.x:
@@ -543,14 +553,14 @@ def startBigBoss():
     bigBoss.set_scale(2.0)
     bigBoss.set_position(80, (-bigBoss.height * 2))
 
-    bigBoss.set_position(80, 60)
+    bigBoss.set_position(80, -60)
 
     if debug:
         sprites.set_data_number(bigBoss, "health", 1)
     else:
         sprites.set_data_number(bigBoss, "health", 300)
     sprites.set_data_number(bigBoss, "bullletType", 0)
-    sprites.set_data_number(bigBoss, "shootDelay", 25)
+    sprites.set_data_number(bigBoss, "shootDelay", 35)
     sprites.set_data_number(bigBoss, "waypointX", 80)
     sprites.set_data_number(bigBoss, "waypointY", -60)
     sprites.set_data_boolean(bigBoss, "anim", False)
@@ -577,13 +587,13 @@ def updateBigBoss():
         elif randomSlot == 1:#Flake shot
             shootBullets(bigBoss.x, bigBoss.y, 100, 15, 0, 2, 0)
         elif randomSlot == 2:#Circle shot
-            shootBullets(bigBoss.x, bigBoss.y, 60, 10, 80, 0, 4)
+            shootBullets(bigBoss.x, bigBoss.y, 40, 10, 80, 0, 4)
         elif randomSlot == 3:#Line
             shootBullets(bigBoss.x, bigBoss.y, 70, 0, 80, 1, 0)
         elif randomSlot == 4:#Heat Seeker
             shootBullets(bigBoss.x, bigBoss.y, 80, 0, 0, 4, 0)
 
-        sprites.set_data_number(bigBoss, "shootDelay", 25)
+        sprites.set_data_number(bigBoss, "shootDelay", 35)
     else:
         sprites.set_data_number(bigBoss, "shootDelay",  shootDelay - 1)
     
@@ -661,20 +671,18 @@ def prevClass():
     global playersClass
     playersClass -= 1
 
-
-
 debug = False
 
 if debug:
     sprites.set_data_number(enemyOne, "health", 1)
 else:
-    sprites.set_data_number(enemyOne, "health", 30) # enemyHealth = 30 OLD Code
+    sprites.set_data_number(enemyOne, "health", 30)
 
 #spawnEnemy()
 #spawnEnemy()
 
-#enemyStage = 3
-#startBigBoss()
+enemyStage = 3
+startBigBoss()
 
 startScrollingBG()
 def on_forever():

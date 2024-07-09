@@ -51,6 +51,7 @@ function collision() {
     let angle: number;
     let velX: number;
     let velY: number;
+    let highest: number;
     // TODO this will need a clean up.
     
     if (!screenFlash) {
@@ -137,11 +138,17 @@ function collision() {
         }
     }
     
+    // Player Bullet Code
     // Cleaned up - Projectile Collision Detection
     for (let value3 of sprites.allOfKind(SpriteKind.Projectile)) {
         for (let enemy of sprites.allOfKind(SpriteKind.Enemy)) {
             dist = calcDist(value3.x, value3.y, enemy.x, enemy.y)
-            if (dist >= 10) {
+            highest = enemy.width
+            if (enemy.height > highest) {
+                highest = enemy.height
+            }
+            
+            if (dist >= enemy.width) {
                 continue
             }
             
@@ -598,14 +605,17 @@ function updateEnemyGroup() {
     let tPosX: number;
     let tPosY: number;
     
+    // End stage detect.
     if (sprites.allOfKind(SpriteKind.Enemy).length <= 0) {
         startBigBoss()
         enemyStage += 1
+        info.changeLifeBy(3)
         return
     }
     
     let totalHealth = 0
     for (let enemy of sprites.allOfKind(SpriteKind.Enemy)) {
+        // Varible collection.
         waypointPos = [sprites.readDataNumber(enemy, "waypointX"), sprites.readDataNumber(enemy, "waypointY")]
         waypointDist = calcDist(enemy.x, enemy.y, waypointPos[0], waypointPos[1])
         playerDist = calcDist(enemy.x, enemy.y, playerOne.x, playerOne.y)
@@ -613,11 +623,13 @@ function updateEnemyGroup() {
         enemyMoveDelay = sprites.readDataNumber(enemy, "moveDelay")
         shootToggle = sprites.readDataBoolean(enemy, "shootToggle")
         totalHealth += sprites.readDataNumber(enemy, "health")
+        // Death check
         if (sprites.readDataNumber(enemy, "health") <= 0) {
             sprites.destroy(enemy)
             continue
         }
         
+        // Shoot code
         if (enemyShootDelay <= 0 && playerDist <= 90 && !(playerDist <= 40)) {
             if (shootToggle) {
                 // Shoot laser here
@@ -642,6 +654,7 @@ function updateEnemyGroup() {
             sprites.setDataNumber(enemy, "shootDelay", enemyShootDelay - 1)
         }
         
+        // Movement Code this code creates a movement position.
         if (waypointDist <= 2.5) {
             if (enemyMoveDelay <= 0 || sprites.readDataNumber(enemy, "anim")) {
                 sprites.setDataNumber(enemy, "moveDelay", 60)
@@ -683,6 +696,7 @@ function updateEnemyGroup() {
             }
             
         } else {
+            // This code movement enemy to the position.
             if (waypointPos[0] < enemy.x) {
                 enemy.x -= 2
             } else if (waypointPos[0] > enemy.x) {
@@ -740,7 +754,7 @@ function startBigBoss() {
     bigBoss = sprites.create(assets.image`BigBoss0`, SpriteKind.Enemy)
     bigBoss.setScale(2.0)
     bigBoss.setPosition(80, -bigBoss.height * 2)
-    bigBoss.setPosition(80, 60)
+    bigBoss.setPosition(80, -60)
     if (debug) {
         sprites.setDataNumber(bigBoss, "health", 1)
     } else {
@@ -748,7 +762,7 @@ function startBigBoss() {
     }
     
     sprites.setDataNumber(bigBoss, "bullletType", 0)
-    sprites.setDataNumber(bigBoss, "shootDelay", 25)
+    sprites.setDataNumber(bigBoss, "shootDelay", 35)
     sprites.setDataNumber(bigBoss, "waypointX", 80)
     sprites.setDataNumber(bigBoss, "waypointY", -60)
     sprites.setDataBoolean(bigBoss, "anim", false)
@@ -784,7 +798,7 @@ function updateBigBoss() {
             shootBullets(bigBoss.x, bigBoss.y, 100, 15, 0, 2, 0)
         } else if (randomSlot == 2) {
             // Circle shot
-            shootBullets(bigBoss.x, bigBoss.y, 60, 10, 80, 0, 4)
+            shootBullets(bigBoss.x, bigBoss.y, 40, 10, 80, 0, 4)
         } else if (randomSlot == 3) {
             // Line
             shootBullets(bigBoss.x, bigBoss.y, 70, 0, 80, 1, 0)
@@ -793,7 +807,7 @@ function updateBigBoss() {
             shootBullets(bigBoss.x, bigBoss.y, 80, 0, 0, 4, 0)
         }
         
-        sprites.setDataNumber(bigBoss, "shootDelay", 25)
+        sprites.setDataNumber(bigBoss, "shootDelay", 35)
     } else {
         sprites.setDataNumber(bigBoss, "shootDelay", shootDelay - 1)
     }
@@ -885,11 +899,10 @@ if (debug) {
     sprites.setDataNumber(enemyOne, "health", 30)
 }
 
-//  enemyHealth = 30 OLD Code
 // spawnEnemy()
 // spawnEnemy()
-// enemyStage = 3
-// startBigBoss()
+enemyStage = 3
+startBigBoss()
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true
