@@ -681,8 +681,8 @@ else:
 #spawnEnemy()
 #spawnEnemy()
 
-enemyStage = 3
-startBigBoss()
+#enemyStage = 3
+#startBigBoss()
 
 startScrollingBG()
 def on_forever():

@@ -901,8 +901,8 @@ if (debug) {
 
 // spawnEnemy()
 // spawnEnemy()
-enemyStage = 3
-startBigBoss()
+// enemyStage = 3
+// startBigBoss()
 startScrollingBG()
 forever(function on_forever() {
     game.stats = true
