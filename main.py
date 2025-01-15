@@ -5,6 +5,7 @@ class SpriteKind:
     EnemyProjLaser = SpriteKind.create()
     EnemyHeatSeeker = SpriteKind.create()
     EnemySpaceShip = SpriteKind.create()
+    EnemyBoosterShot = SpriteKind.create()
 
 #Standard Milliseconde delay tracker.
 class msDelay():
@@ -43,7 +44,7 @@ def collision():#TODO this will need a clean up.
 
                 if lifeTimer <= 50:
                     speed = sprites.read_data_number(seeker, "speed")
-                    angle = ( calcAngle(seeker.x - (seeker.width / 2), seeker.y - (seeker.height / 2), playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
+                    angle = ( calcAngle(seeker.x - (seeker.width / 2), seeker.y - (seeker.height / 2), playerOne.x - (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) )  * 0.017453292519943295
                     velX = Math.sin(angle) * speed
                     velY = Math.cos(angle) * speed
                     seeker.set_velocity(velX, velY)
@@ -52,12 +53,37 @@ def collision():#TODO this will need a clean up.
                     seeker.set_image(assets.image("EnemyInactiveSeeker"))
 
                 if playerOne.overlaps_with(seeker):
-                        seeker.start_effect(effects.fire, 100)
-                        sprites.destroy(seeker)
-                        info.change_life_by(-1)
-                        screenFlash = True
-                        screenFlashTimer.reset()
-                        break
+                    seeker.start_effect(effects.fire, 100)
+                    sprites.destroy(seeker)
+                    info.change_life_by(-1)
+                    screenFlash = True
+                    screenFlashTimer.reset()
+                    break
+
+        #Booster shot projectile
+        for booster in sprites.all_of_kind(SpriteKind.EnemyBoosterShot):
+            boostState = sprites.read_data_boolean(booster, "Boosting")
+
+            if not boostState:
+                distToPlayer = calcDist(booster.x + (booster.vx / 2), booster.y + (booster.vy / 2), playerOne.x, playerOne.y)
+
+                if distToPlayer <= 40:
+                    booster.set_image(assets.image("BoosterShotBoost"))
+                    sprites.set_data_boolean(booster, "Boosting", True)
+                    angle = sprites.read_data_number(booster, "Angle")
+                    speed = sprites.read_data_number(booster, "speed") * 2.5
+                    velX = Math.sin(angle) * speed
+                    velY = Math.cos(angle) * speed
+                    booster.set_velocity(velX, velY)
+
+            if playerOne.overlaps_with(booster):
+                booster.start_effect(effects.fire, 100)
+                sprites.destroy(booster)
+                info.change_life_by(-1)
+                screenFlash = True
+                screenFlashTimer.reset()
+                break
+
         #Laser Segments
         for laserSeg in sprites.all_of_kind(SpriteKind.EnemyProjLaser):
             lifeTimer = sprites.read_data_number(laserSeg, "lifeTimer")
@@ -416,6 +442,18 @@ def shootBullets(posX: number, posY: number, speed: number, distance: number, an
         velX = Math.sin(angle) * speed
         velY = Math.cos(angle) * speed
         enProj.set_velocity(velX, velY)
+    elif typeBullet == 5:
+        #BoosterShot when close to enemy will rapidly speed up.
+        enProj = sprites.create(assets.image("""BoosterShotIdle"""), SpriteKind.EnemyBoosterShot)
+        enProj.set_flag(SpriteFlag.AUTO_DESTROY, True)
+        enProj.set_position(posX, posY)
+        sprites.set_data_boolean(enProj, "Boosting", False)
+        sprites.set_data_number(enProj, "speed", speed)
+        angle = ( calcAngle(posX, posY, playerOne.x- (playerOne.width / 2), playerOne.y - (playerOne.height / 2)) + angleOffset )  * 0.017453292519943295
+        sprites.set_data_number(enProj, "Angle", angle)
+        velX = Math.sin(angle) * speed
+        velY = Math.cos(angle) * speed
+        enProj.set_velocity(velX, velY)
 
 #Updates the Ship Enemy Group.
 def updateEnemyGroup():
@@ -457,7 +495,7 @@ def updateEnemyGroup():
             else:
                 #Shoot seekers here
                 shootCount = sprites.read_data_number(enemy, "shootCounter")
-                shootBullets(enemy.x, enemy.y + (enemy.height / 2), 60, 100, 0, 4, 0)
+                shootBullets(enemy.x, enemy.y + (enemy.height / 2), 60, 100, 0, 5, 0)
 
                 if shootCount >= 1:
                     sprites.set_data_number(enemy, "shootCounter", 0)
@@ -644,7 +682,7 @@ enemyOne = sprites.create(assets.image("""
 """), SpriteKind.enemy)
 enemyOne.set_position(80, -15)
 playerOne = sprites.create(assets.image("""
-    myImage
+    PlayerClass1
 """), SpriteKind.player)
 playerOne.set_position(80, 90)
 playerOne.set_stay_in_screen(True)
@@ -678,11 +716,13 @@ if debug:
 else:
     sprites.set_data_number(enemyOne, "health", 30)
 
-#spawnEnemy()
-#spawnEnemy()
 
-enemyStage = 3
-startBigBoss()
+
+enemyStage = 2
+
+spawnEnemy()
+spawnEnemy()
+#startBigBoss()
 
 startScrollingBG()
 def on_forever():
