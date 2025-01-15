@@ -23,7 +23,7 @@ class msDelay():
     def reset(self):
         self.counter = game.runtime()
 
-def collision():#TODO this will need a clean up.
+def collision():
     global screenFlash, score
     if not screenFlash:
         #Normal Bullet code.
@@ -32,11 +32,7 @@ def collision():#TODO this will need a clean up.
             if dist >= 10:
                 continue
             if playerOne.overlaps_with(value):
-                value.start_effect(effects.fire, 100)
-                sprites.destroy(value)
-                info.change_life_by(-1)
-                screenFlash = True
-                screenFlashTimer.reset()
+                applyDamageAndDestroy(value)
                 break
         # Heat Seeking Bullets
         for seeker in sprites.all_of_kind(SpriteKind.EnemyHeatSeeker):
@@ -53,11 +49,7 @@ def collision():#TODO this will need a clean up.
                     seeker.set_image(assets.image("EnemyInactiveSeeker"))
 
                 if playerOne.overlaps_with(seeker):
-                    seeker.start_effect(effects.fire, 100)
-                    sprites.destroy(seeker)
-                    info.change_life_by(-1)
-                    screenFlash = True
-                    screenFlashTimer.reset()
+                    applyDamageAndDestroy(seeker)
                     break
 
         #Booster shot projectile
@@ -77,11 +69,7 @@ def collision():#TODO this will need a clean up.
                     booster.set_velocity(velX, velY)
 
             if playerOne.overlaps_with(booster):
-                booster.start_effect(effects.fire, 100)
-                sprites.destroy(booster)
-                info.change_life_by(-1)
-                screenFlash = True
-                screenFlashTimer.reset()
+                applyDamageAndDestroy(booster)
                 break
 
         #Laser Segments
@@ -99,11 +87,7 @@ def collision():#TODO this will need a clean up.
                     sprites.destroy(laserSeg)
 
                 if playerOne.overlaps_with(laserSeg):
-                    laserSeg.start_effect(effects.fire, 100)
-                    sprites.destroy(laserSeg)
-                    info.change_life_by(-1)
-                    screenFlash = True
-                    screenFlashTimer.reset()
+                    applyDamageAndDestroy(laserSeg)
                     break
         #Flak Bullets
         for value2 in sprites.all_of_kind(SpriteKind.EnemyProjFlak):
@@ -132,6 +116,14 @@ def collision():#TODO this will need a clean up.
                 sprites.change_data_number_by(enemy, "health", -1)
                 score += 100
     
+def applyDamageAndDestroy(projSprite: Sprite):
+    global screenFlash, score 
+    projSprite.start_effect(effects.fire, 100)
+    sprites.destroy(projSprite)
+    info.change_life_by(-1)
+    screenFlash = True
+    screenFlashTimer.reset()
+
 def updatePlayer():
     global moveSpeed, fireType, fireDelay, screenFlash, screenFlashTimer, bgVSpeed
     #Player Movement speed.
@@ -208,14 +200,9 @@ def updateEnemy():
                 enemyFireDelay.reset()
             elif Math.percent_chance(2): 
                 if waypoint == None:
-                    tPosX = Math.round(Math.random() * 100)
-                    tPosY = Math.round(Math.random() * 100)
-                    # Min check
-                    tPosX = min(tPosX, scene.screen_width())
-                    tPosY = min(tPosY, scene.screen_height())
-                    # Max check
-                    tPosX = max(tPosX, 0)
-                    tPosY = max(tPosY, 0)
+                    #Min and Max check.
+                    tPosX = Math.clamp(0, scene.screen_width(), Math.round(Math.random() * 100))
+                    tPosY = Math.clamp(0, scene.screen_height(), Math.round(Math.random() * 100))
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
                     if distToPlayer >= 60:
                         waypoint = [tPosX, tPosY]
@@ -252,14 +239,9 @@ def updateEnemy():
                 enemyFireDelay.reset()
             elif Math.percent_chance(4):
                 if waypoint == None:
-                    tPosX = Math.round(Math.random() * 100)
-                    tPosY = Math.round(Math.random() * 100)
-                    # Min check
-                    tPosX = min(tPosX, scene.screen_width())
-                    tPosY = min(tPosY, scene.screen_height())
-                    # Max check
-                    tPosX = max(tPosX, 0)
-                    tPosY = max(tPosY, 0)
+                    # Min and Max check
+                    tPosX = Math.clamp(0, scene.screen_width(), Math.round(Math.random() * 100))
+                    tPosY = Math.clamp(0, scene.screen_height(), Math.round(Math.random() * 100))
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
                     if distToPlayer >= 35:
                         waypoint = [tPosX, tPosY]
@@ -276,7 +258,7 @@ def updateEnemy():
         #If we have a waypoint we move towards it. This also applies animations to the enemy.
         setImage = False
         # X
-        if enemyOne.x < waypoint[0]:
+        if enemyOne.x < waypoint[0]:# TODO Put the animations into Arrays and then use that instead of the else if statements.
             enemyOne.x += 1
             if not setImage:
                 enemyNormalImage = assets.image("""EnemyRight""")
@@ -495,7 +477,7 @@ def updateEnemyGroup():
             else:
                 #Shoot seekers here
                 shootCount = sprites.read_data_number(enemy, "shootCounter")
-                shootBullets(enemy.x, enemy.y + (enemy.height / 2), 60, 100, 0, 5, 0)
+                shootBullets(enemy.x, enemy.y + (enemy.height / 2), 60, 100, 0, 4, 0)
 
                 if shootCount >= 1:
                     sprites.set_data_number(enemy, "shootCounter", 0)
@@ -521,14 +503,9 @@ def updateEnemyGroup():
                     iterLimit = iterLimit - 1
                     if iterLimit == 0:
                         break
-                    tPosX = Math.round(Math.random() * 100)
-                    tPosY = Math.round(Math.random() * 100)
-                    # Min check
-                    tPosX = min(tPosX, scene.screen_width())
-                    tPosY = min(tPosY, scene.screen_height())
-                    # Max check
-                    tPosX = max(tPosX, 0)
-                    tPosY = max(tPosY, 0)
+                    # Min and Max check
+                    tPosX = Math.clamp(0, scene.screen_width(), Math.round(Math.random() * 100))
+                    tPosY = Math.clamp(0, scene.screen_height(), Math.round(Math.random() * 100))
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
                     if  playerDist >= 50:
                         goodWaypoint = True
@@ -718,10 +695,9 @@ else:
 
 #enemyStage = 2
 
-#spawnEnemy()
-#spawnEnemy()
-
-#enemyStage = 3
+spawnEnemy()
+spawnEnemy()
+enemyStage = 2
 
 #startBigBoss()
 

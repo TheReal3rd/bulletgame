@@ -55,7 +55,6 @@ function collision() {
     let boostState: boolean;
     let distToPlayer: number;
     let highest: number;
-    // TODO this will need a clean up.
     
     if (!screenFlash) {
         // Normal Bullet code.
@@ -66,11 +65,7 @@ function collision() {
             }
             
             if (playerOne.overlapsWith(value)) {
-                value.startEffect(effects.fire, 100)
-                sprites.destroy(value)
-                info.changeLifeBy(-1)
-                screenFlash = true
-                screenFlashTimer.reset()
+                applyDamageAndDestroy(value)
                 break
             }
             
@@ -90,11 +85,7 @@ function collision() {
             }
             
             if (playerOne.overlapsWith(seeker)) {
-                seeker.startEffect(effects.fire, 100)
-                sprites.destroy(seeker)
-                info.changeLifeBy(-1)
-                screenFlash = true
-                screenFlashTimer.reset()
+                applyDamageAndDestroy(seeker)
                 break
             }
             
@@ -117,11 +108,7 @@ function collision() {
             }
             
             if (playerOne.overlapsWith(booster)) {
-                booster.startEffect(effects.fire, 100)
-                sprites.destroy(booster)
-                info.changeLifeBy(-1)
-                screenFlash = true
-                screenFlashTimer.reset()
+                applyDamageAndDestroy(booster)
                 break
             }
             
@@ -142,11 +129,7 @@ function collision() {
                 }
                 
                 if (playerOne.overlapsWith(laserSeg)) {
-                    laserSeg.startEffect(effects.fire, 100)
-                    sprites.destroy(laserSeg)
-                    info.changeLifeBy(-1)
-                    screenFlash = true
-                    screenFlashTimer.reset()
+                    applyDamageAndDestroy(laserSeg)
                     break
                 }
                 
@@ -191,6 +174,15 @@ function collision() {
             
         }
     }
+}
+
+function applyDamageAndDestroy(projSprite: Sprite) {
+    
+    projSprite.startEffect(effects.fire, 100)
+    sprites.destroy(projSprite)
+    info.changeLifeBy(-1)
+    screenFlash = true
+    screenFlashTimer.reset()
 }
 
 function updatePlayer() {
@@ -300,14 +292,9 @@ function updateEnemy() {
                 enemyFireDelay.reset()
             } else if (Math.percentChance(2)) {
                 if (waypoint == null) {
-                    tPosX = Math.round(Math.random() * 100)
-                    tPosY = Math.round(Math.random() * 100)
-                    //  Min check
-                    tPosX = Math.min(tPosX, scene.screenWidth())
-                    tPosY = Math.min(tPosY, scene.screenHeight())
-                    //  Max check
-                    tPosX = Math.max(tPosX, 0)
-                    tPosY = Math.max(tPosY, 0)
+                    // Min and Max check.
+                    tPosX = Math.clamp(0, scene.screenWidth(), Math.round(Math.random() * 100))
+                    tPosY = Math.clamp(0, scene.screenHeight(), Math.round(Math.random() * 100))
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
                     if (distToPlayer >= 60) {
                         waypoint = [tPosX, tPosY]
@@ -357,14 +344,9 @@ function updateEnemy() {
                 enemyFireDelay.reset()
             } else if (Math.percentChance(4)) {
                 if (waypoint == null) {
-                    tPosX = Math.round(Math.random() * 100)
-                    tPosY = Math.round(Math.random() * 100)
-                    //  Min check
-                    tPosX = Math.min(tPosX, scene.screenWidth())
-                    tPosY = Math.min(tPosY, scene.screenHeight())
-                    //  Max check
-                    tPosX = Math.max(tPosX, 0)
-                    tPosY = Math.max(tPosY, 0)
+                    //  Min and Max check
+                    tPosX = Math.clamp(0, scene.screenWidth(), Math.round(Math.random() * 100))
+                    tPosY = Math.clamp(0, scene.screenHeight(), Math.round(Math.random() * 100))
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
                     if (distToPlayer >= 35) {
                         waypoint = [tPosX, tPosY]
@@ -393,6 +375,7 @@ function updateEnemy() {
         setImage = false
         //  X
         if (enemyOne.x < waypoint[0]) {
+            //  TODO Put the animations into Arrays and then use that instead of the else if statements.
             enemyOne.x += 1
             if (!setImage) {
                 enemyNormalImage = assets.image`EnemyRight`
@@ -681,7 +664,7 @@ function updateEnemyGroup() {
             } else {
                 // Shoot seekers here
                 shootCount = sprites.readDataNumber(enemy, "shootCounter")
-                shootBullets(enemy.x, enemy.y + enemy.height / 2, 60, 100, 0, 5, 0)
+                shootBullets(enemy.x, enemy.y + enemy.height / 2, 60, 100, 0, 4, 0)
                 if (shootCount >= 1) {
                     sprites.setDataNumber(enemy, "shootCounter", 0)
                     sprites.setDataBoolean(enemy, "shootToggle", !shootToggle)
@@ -714,14 +697,9 @@ function updateEnemyGroup() {
                         break
                     }
                     
-                    tPosX = Math.round(Math.random() * 100)
-                    tPosY = Math.round(Math.random() * 100)
-                    //  Min check
-                    tPosX = Math.min(tPosX, scene.screenWidth())
-                    tPosY = Math.min(tPosY, scene.screenHeight())
-                    //  Max check
-                    tPosX = Math.max(tPosX, 0)
-                    tPosY = Math.max(tPosY, 0)
+                    //  Min and Max check
+                    tPosX = Math.clamp(0, scene.screenWidth(), Math.round(Math.random() * 100))
+                    tPosY = Math.clamp(0, scene.screenHeight(), Math.round(Math.random() * 100))
                     distToPlayer = calcDist(tPosX, tPosY, playerOne.x, playerOne.y)
                     if (playerDist >= 50) {
                         goodWaypoint = true
@@ -941,15 +919,10 @@ if (debug) {
     sprites.setDataNumber(enemyOne, "health", 30)
 }
 
-//<<<<<<< Conflict
-//enemyStage = 2
-//spawnEnemy()
-//spawnEnemy()
-//=======
-// spawnEnemy()
-// spawnEnemy()
-// enemyStage = 3
-//>>>>>>> master
+// enemyStage = 2
+spawnEnemy()
+spawnEnemy()
+enemyStage = 2
 // startBigBoss()
 startScrollingBG()
 forever(function on_forever() {
