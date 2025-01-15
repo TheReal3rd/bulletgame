@@ -4,6 +4,7 @@ namespace SpriteKind {
     export const EnemyProjLaser = SpriteKind.create()
     export const EnemyHeatSeeker = SpriteKind.create()
     export const EnemySpaceShip = SpriteKind.create()
+    export const EnemyBoosterShot = SpriteKind.create()
 }
 
 // Standard Milliseconde delay tracker.
@@ -51,6 +52,8 @@ function collision() {
     let angle: number;
     let velX: number;
     let velY: number;
+    let boostState: boolean;
+    let distToPlayer: number;
     let highest: number;
     // TODO this will need a clean up.
     
@@ -89,6 +92,33 @@ function collision() {
             if (playerOne.overlapsWith(seeker)) {
                 seeker.startEffect(effects.fire, 100)
                 sprites.destroy(seeker)
+                info.changeLifeBy(-1)
+                screenFlash = true
+                screenFlashTimer.reset()
+                break
+            }
+            
+        }
+        // Booster shot projectile
+        for (let booster of sprites.allOfKind(SpriteKind.EnemyBoosterShot)) {
+            boostState = sprites.readDataBoolean(booster, "Boosting")
+            if (!boostState) {
+                distToPlayer = calcDist(booster.x + booster.vx / 2, booster.y + booster.vy / 2, playerOne.x, playerOne.y)
+                if (distToPlayer <= 40) {
+                    booster.setImage(assets.image`BoosterShotBoost`)
+                    sprites.setDataBoolean(booster, "Boosting", true)
+                    angle = sprites.readDataNumber(booster, "Angle")
+                    speed = sprites.readDataNumber(booster, "speed") * 2.5
+                    velX = Math.sin(angle) * speed
+                    velY = Math.cos(angle) * speed
+                    booster.setVelocity(velX, velY)
+                }
+                
+            }
+            
+            if (playerOne.overlapsWith(booster)) {
+                booster.startEffect(effects.fire, 100)
+                sprites.destroy(booster)
                 info.changeLifeBy(-1)
                 screenFlash = true
                 screenFlashTimer.reset()
@@ -586,6 +616,18 @@ function shootBullets(posX: number, posY: number, speed: number, distance: numbe
         velX = Math.sin(angle) * speed
         velY = Math.cos(angle) * speed
         enProj.setVelocity(velX, velY)
+    } else if (typeBullet == 5) {
+        // BoosterShot when close to enemy will rapidly speed up.
+        enProj = sprites.create(assets.image`BoosterShotIdle`, SpriteKind.EnemyBoosterShot)
+        enProj.setFlag(SpriteFlag.AutoDestroy, true)
+        enProj.setPosition(posX, posY)
+        sprites.setDataBoolean(enProj, "Boosting", false)
+        sprites.setDataNumber(enProj, "speed", speed)
+        angle = (calcAngle(posX, posY, playerOne.x - playerOne.width / 2, playerOne.y - playerOne.height / 2) + angleOffset) * 0.017453292519943295
+        sprites.setDataNumber(enProj, "Angle", angle)
+        velX = Math.sin(angle) * speed
+        velY = Math.cos(angle) * speed
+        enProj.setVelocity(velX, velY)
     }
     
 }
@@ -639,7 +681,7 @@ function updateEnemyGroup() {
             } else {
                 // Shoot seekers here
                 shootCount = sprites.readDataNumber(enemy, "shootCounter")
-                shootBullets(enemy.x, enemy.y + enemy.height / 2, 60, 100, 0, 4, 0)
+                shootBullets(enemy.x, enemy.y + enemy.height / 2, 60, 100, 0, 5, 0)
                 if (shootCount >= 1) {
                     sprites.setDataNumber(enemy, "shootCounter", 0)
                     sprites.setDataBoolean(enemy, "shootToggle", !shootToggle)
@@ -863,7 +905,7 @@ enemyOne = sprites.create(assets.image`
 `, SpriteKind.Enemy)
 enemyOne.setPosition(80, -15)
 playerOne = sprites.create(assets.image`
-    myImage
+    PlayerClass1
 `, SpriteKind.Player)
 playerOne.setPosition(80, 90)
 playerOne.setStayInScreen(true)
@@ -899,9 +941,15 @@ if (debug) {
     sprites.setDataNumber(enemyOne, "health", 30)
 }
 
+//<<<<<<< Conflict
+//enemyStage = 2
+//spawnEnemy()
+//spawnEnemy()
+//=======
 // spawnEnemy()
 // spawnEnemy()
 // enemyStage = 3
+//>>>>>>> master
 // startBigBoss()
 startScrollingBG()
 forever(function on_forever() {

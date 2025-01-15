@@ -1,9 +1,4 @@
 {
-    "image1": {
-        "data": "hwQQACAAAAAAAAAAAADw//8AAAAAAAAAAAAAAMzMz73LDAAAAPD/AAAAz8wR8du7zM0MAAC/+wAA8BzDEcG7+9zdzQzwuw8AAM/MExwRu8vMzNv7v8sPAPAbETPMEbu7zMzMzMz8AAC/uxERERG7u8vMzMy7/AAAv7y7Ef+xvLu7zMz8v/sAAP+7u7v/u7y8u8zM/Ny7DwAAv7u7u8vLu7vM/A/cuwwAAPC/u7u7vLvL/w8AwLzLAAAA8P//zMzM/wAAAADAzAAAAAAAAM+8yw8AAAAAAAAAAAAAAADM3bsPAAAAAAAAAAAAAAAAwNy9/AAAAAAAAAAAAAAAAADA/P8AAAAAAAAA",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "myImage"
-    },
     "image3": {
         "data": "hwQYABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8P8AAAAAAAAAAAAAwLEAAAAAAAAA//8PH/sAAAAAAAD/3b38H7EAAAAAAPAbEd29H/sAAAAAAPAREb0czPEPAAAAAB8REfEfvf8PAAAAAB8REdER+///AAAAAB8REdERsf//AAAAAB8REfEf+///AAAAAPAREb0czbEPAAAAAPAbEd29H/sAAAAAAAD/3b38H7EAAAAAAAAA//8PH/sAAAAAAAAAAAAAz7EAAAAAAAAAAAAA8P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
         "mimeType": "image/x-mkcd-f4",
@@ -133,6 +128,26 @@
         "data": "hwQQABAAAAD/////////////////T0T/T//////0//8vL/H///T//y8f8Yj/9P/////////y//////////L/////////8v/////////y//////////L//0//////8v//Ly/xiP/y//8vH/H///L/////////LyL//////////////////////w==",
         "mimeType": "image/x-mkcd-f4",
         "displayName": "BigBoss4"
+    },
+    "image1": {
+        "data": "hwQQACAAAAAAAAAAAADw//8AAAAAAAAAAAAAAMzMz73LDAAAAPD/AAAAz8wR8du7zM0MAAC/+wAA8BzDEcG7+9zdzQzwuw8AAM/MExwRu8vMzNv7v8sPAPAbETPMEbu7zMzMzMz8AAC/uxERERG7u8vMzMy7/AAAv7y7Ef+xvLu7zMz8v/sAAP+7u7v/u7y8u8zM/Ny7DwAAv7u7u8vLu7vM/A/cuwwAAPC/u7u7vLvL/w8AwLzLAAAA8P//zMzM/wAAAADAzAAAAAAAAM+8yw8AAAAAAAAAAAAAAADM3bsPAAAAAAAAAAAAAAAAwNy9/AAAAAAAAAAAAAAAAADA/P8AAAAAAAAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "PlayerClass1"
+    },
+    "image28": {
+        "data": "hwQQABAAAAAAAAAAAAAAAAAAAAD///8AAADw/1VV9QAA8B8Ru1v1AP8fERGxuw8A390REbEbD8zA3B0RERu7xQDMHRwbG1XFAMAdERsRu8UAwBERGxEMzADAEbEbEQwAAAAcsRu7zAAAALy7u1tVDAAAwFVVVVUMAAAAzFVVxQAAAAAAzMwMAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "PlayerClass2"
+    },
+    "image29": {
+        "data": "hwQFAAUAAADAzAAAfHcMAHx1DAB8dwwAwMwAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "BoosterShotIdle"
+    },
+    "image30": {
+        "data": "hwQFAAUAAADAzAAALCIMACwkDAAsIgwAwMwAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "BoosterShotBoost"
     },
     "*": {
         "mimeType": "image/x-mkcd-f4",
