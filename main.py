@@ -716,12 +716,13 @@ if debug:
 else:
     sprites.set_data_number(enemyOne, "health", 30)
 
+#enemyStage = 2
 
+#spawnEnemy()
+#spawnEnemy()
 
-enemyStage = 2
+#enemyStage = 3
 
-spawnEnemy()
-spawnEnemy()
 #startBigBoss()
 
 startScrollingBG()

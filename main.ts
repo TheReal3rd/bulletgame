@@ -941,9 +941,15 @@ if (debug) {
     sprites.setDataNumber(enemyOne, "health", 30)
 }
 
-enemyStage = 2
-spawnEnemy()
-spawnEnemy()
+//<<<<<<< Conflict
+//enemyStage = 2
+//spawnEnemy()
+//spawnEnemy()
+//=======
+// spawnEnemy()
+// spawnEnemy()
+// enemyStage = 3
+//>>>>>>> master
 // startBigBoss()
 startScrollingBG()
 forever(function on_forever() {
