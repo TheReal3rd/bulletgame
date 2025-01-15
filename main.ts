@@ -920,9 +920,9 @@ if (debug) {
 }
 
 // enemyStage = 2
-spawnEnemy()
-spawnEnemy()
-enemyStage = 2
+// spawnEnemy()
+// spawnEnemy()
+// enemyStage = 2
 // startBigBoss()
 startScrollingBG()
 forever(function on_forever() {

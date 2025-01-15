@@ -695,9 +695,9 @@ else:
 
 #enemyStage = 2
 
-spawnEnemy()
-spawnEnemy()
-enemyStage = 2
+#spawnEnemy()
+#spawnEnemy()
+#enemyStage = 2
 
 #startBigBoss()
 
